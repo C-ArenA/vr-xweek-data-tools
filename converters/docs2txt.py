@@ -4,7 +4,7 @@ import pypandoc # install version with pandoc included
 import unicodedata
 import re
 
-def docs2md(docs_paths_list, collected_mds_dir):
+def docs2txt(docs_paths_list, collected_mds_dir):
 
     # -------------- Verifico que el directorio ded destino existe
     if not os.path.isdir(collected_mds_dir):
@@ -31,14 +31,22 @@ def general_nomalization(file_path):
     Normaliza los textos previo a la normalización manual. Aquí no se pierden datos
     Esto no debería cambiar mucho con el tiempo
     """
-    emojis = ['🍽️', '🍕', '🍺', '🥤', '💵', '📍', '☎️', '⏰', '🚚']
+    emojis = ['🍽️', '🍕', '🍔', '🍟', '🍺', '🥤', '💵', '📍', '☎️', '⏰', '🚚']
     with open(file_path, 'r+', encoding="utf-8") as f:
         text = f.read()
         text = unicodedata.normalize('NFKD', text) # Normalizamos el tipo de texto
         text = text.strip() # Quitamos espacios y saltos de línea al principio y final
-        # Remplazamos texto por emoji en los dos casos dados
+        # Remplazamos texto por emoji en los casos dados
+        print("----------------------------------------------------------")
+        print(text)
         text = re.sub(r' *🍺 ?🥤 *Bebidas *:', '🍺', text) 
         text = re.sub(r' *Maridaje *sugerido *:', '🥤', text)
+        text = re.sub(r' *MARIDAJE *SUGERIDO *:', '🥤', text)
+        text = re.sub(r' *🍟 *Acompañamiento *:', '🍟', text)
+        text = re.sub(r' *🍟 *A.*o *:', '🍟', text)
+        text = re.sub(r'🍟 Acompañamiento:', '🍟', text) 
+        text = text.replace("🍟 Acompañamiento:", "🍟")
+        print(text)
         # Creamos excedente de saltos de línea antes de los emojis para que luego no se pierdan al quitar saltos de línea excedentes
         for emoji in emojis:
             text = re.sub(rf'^ *{emoji}', f'\n{emoji}', text, flags=re.M)
@@ -48,6 +56,7 @@ def general_nomalization(file_path):
         text = re.sub('\*------\*', '\n', text)
         # Le damos identificador al nombre de cada comida
         text = re.sub(r'\n(.*)\n🍕', r'\n🍽️ \1\n🍕', text)
+        text = re.sub(r'\n(.*)\n🍔', r'\n🍽️ \1\n🍔', text)
         # Sobreescribimos el archivo con todo normalizaado
         f.seek(0)
         f.write(text)

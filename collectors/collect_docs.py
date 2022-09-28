@@ -17,7 +17,7 @@ def collect_docs(rest_folders_paths: list, collected_docs_dir: str, delete_old: 
     import shutil  # To make operations on many files (os on steroids)
     from slugify import slugify
 
-    # -------------- Verifico que el directorio ded destino existe
+    # -------------- Verifico que el directorio de destino existe
     if not os.path.isdir(collected_docs_dir):
         raise Exception("\n\n -> " + __name__ +
                         "(): El directorio destino no existe")
@@ -52,3 +52,23 @@ def collect_docs(rest_folders_paths: list, collected_docs_dir: str, delete_old: 
         "docs_old_paths": docs_old_paths,
         "docs_new_paths": docs_new_paths
     }
+
+def collect_docs_with_help():
+    """
+    # Recolecta documentos word en una carpeta
+	
+	Retorna un objeto con dos listas:
+	docs path antiguo
+	docs path nuevo
+    """
+    # Recibo el directorio dentro del cual debo buscar archivos de word
+    # Verifico que sea correcto
+    # Recolecto una lista de todos los documentos de Word encontrados
+    # Le indico al usuario cuántos hay
+    # Le pido al usuario que haga check en los documentos que son menús de restaurantes
+    # Le pido al usuario el directorio de destino (Le recomiendo uno)
+    # Le indico el resultado y el enlace a la carpeta donde están los archivos de Word
+    
+       
+if __name__ == "__main__":
+	pass

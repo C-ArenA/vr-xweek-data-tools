@@ -30,9 +30,10 @@ def convert_file_to_dict(file_path, event_domain, uploads_url="/", event_version
     # El texto plano del archivo lo convierto en un array para poder analizar de forma más sencilla
     with open(file_path, 'r', encoding='utf-8') as f:
         text_str = f.read()
-        # Para evitar problemas de compatibilidad:
+        # Para evitar problemas de compatibilidad remplazamos emojis problemáticos con sus equivalentes:
         text_str = text_str.replace('🍽️','🍽')
         text_str = text_str.replace('☎️','☎')
+        # Generamos un regex string con todos los emojis relevantes y con eso spliteamos el texto del archivo
         regex = r"(["
         for emoji in emojis_list:
             regex += emoji["emoji"]

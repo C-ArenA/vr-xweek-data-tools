@@ -1,0 +1,57 @@
+{
+	"event_name": "Nombre del Evento",
+	"event_domain": "Dominio del evento (http://www.whatever.com)",
+	"event_version": "Versión del evento, primero la abreviación de la ciudad, luego un guión y luego el ordinal (lp-1ra)",
+	"event_long_description": "Descripción que va dentro del homepage del sitio web (opcional)",
+	"event_short_description": "Descripción que va en la metadata del sitio web (opcional)",
+	"event_calendar": "Fechas del evento (opcional)",
+	"event_media_url": "(opcional) -> Es la url sobre la cual están guardadas todas las imágenes del evento",
+	"restaurants": [
+		{
+			"order": -1,
+			"name": "MENU TEMPLATE",
+			"address": "Centro: Calle Linares Nro. 809 Sopocachi: Calle Fernando Guachalla Nro. 453 entre Sánchez Lima y 20 de Octubre",
+			"phone": "Centro: 76706660 Sopocachi: 62400413",
+			"opening_hours": "Centro: De lunes a sábado de 9:00 a 22: 15 Sopocachi: De lunes a sábado de 9:00 a 23:00. Domingo de 8:00 a 19:00",
+			"delivery": "Delivery Yaigo, Pedidos Ya.",
+			"slugified_name": "the-carrot-tree",
+			"post_title": "MENU TEMPLATE",
+			"post_name": "menu-template",
+			"post_url": "http://pizzaweekbolivia.com/pw-menu-template-lp-1ra",
+			"logo_name": "the-carrot-tree-lp-1ra.png",
+			"logo_url": "http://pizzaweekbolivia.com/wp-content/uploads/2022/09/the-carrot-tree-lp-1ra.png",
+			"dishes": [
+				{
+					"name": "BUFFALO VEGANO",
+					"description": "Masa de coliflor sin gluten/vegana, salsa de tomate picante, queso mozzarella vegano, Buffalo Coliflor, rodajas de Palta, cebolla caramelizada y salsa de ajo.",
+					"accompaniment": "Papas fritas",
+					"drinks": "Huari Tradicional o Huari Miel o Huari Chocolate o Pepsi o Pepsi Light o 7Up",
+					"pairing": "Huari Chocolate",
+					"price": "Bs. 55",
+					"photo_name": "the-carrot-tree-lp-1ra_buffalo-vegano.jpg",
+					"photo_url": "http://pizzaweekbolivia.com/wp-content/uploads/2022/09/the-carrot-tree-lp-1ra_buffalo-vegano.jpg"
+				},
+				{
+					"name": "MORA, PISTACHO PIZZA",
+					"description": "Base de masa madre, salsa moras asadas, queso de cabra, pistachos tostados, \ny miel (opción de base sin gluten).",
+					"accompaniment": "Papas fritas",
+					"drinks": "Huari Tradicional o Huari Miel o Huari Chocolate o Pepsi o Pepsi Light o 7Up",
+					"pairing": "Huari Miel",
+					"price": "Bs. 55",
+					"photo_name": "the-carrot-tree-lp-1ra_mora-pistacho-pizza.jpg",
+					"photo_url": "http://pizzaweekbolivia.com/wp-content/uploads/2022/09/the-carrot-tree-lp-1ra_mora-pistacho-pizza.jpg"
+				},
+				{
+					"name": "MEXICAN TACO PIZZA",
+					"description": "Base de masa madre, salsa de tomate picante, queso mozzarella, guacamole dos tacos de carne, dos tacos de cerdo y dos tacos de pollo, pico de gallo y mayonesa de mango, cilantro (opción de base sin gluten.)",
+					"accompaniment": "Papas fritas",
+					"drinks": "Huari Tradicional o Huari Miel o Huari Chocolate o Pepsi o Pepsi Light o 7Up",
+					"pairing": "Huari Chocolate",
+					"price": "Bs. 55",
+					"photo_name": "the-carrot-tree-lp-1ra_mexican-taco-pizza.jpg",
+					"photo_url": "http://pizzaweekbolivia.com/wp-content/uploads/2022/09/the-carrot-tree-lp-1ra_mexican-taco-pizza.jpg"
+				}
+			]
+		}
+	]
+}

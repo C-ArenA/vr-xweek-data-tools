@@ -1,7 +1,7 @@
 import json
 
 # Se puede añadir info cambiando esta constante, pero los nombres deben coincidir con el json
-URL_CSV_HEADERS = ["name", "post_name", "slugified_name", "slug", "url"]
+URL_CSV_HEADERS = ["name", "post_name", "slugified_name", "post_name", "post_url"]
 
 def gen_url_csv(json_path, csv_dir):
     import csv

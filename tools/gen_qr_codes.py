@@ -12,7 +12,7 @@ def gen_qr_codes(error_level, dst_dir, urls_list=[], json_path=""):
         #check json
         # TODO: Revisar si el JSON existe
         restaurants = getRestaurantsList(json_path)
-        urls_list = [r["url"] for r in restaurants]
+        urls_list = [r["post_url"] for r in restaurants]
     
     error_levels_dict = {
         "L": qrcode.constants.ERROR_CORRECT_L,
