@@ -2,18 +2,19 @@ import qrcode  # pip install qrcode[pil]
 import os
 import json
 
+
 def gen_qr_codes(error_level, dst_dir, urls_list=[], json_path=""):
     """
     Genera QRs basado en una lista de URLs o en un JSON
     Si se especifican ambos, la lista tiene precedencia
     Sólo especifique uno para evitar confusiones
     """
-    if len(urls_list)==0:
-        #check json
+    if len(urls_list) == 0:
+        # check json
         # TODO: Revisar si el JSON existe
         restaurants = getRestaurantsList(json_path)
         urls_list = [r["post_url"] for r in restaurants]
-    
+
     error_levels_dict = {
         "L": qrcode.constants.ERROR_CORRECT_L,
         "M": qrcode.constants.ERROR_CORRECT_M,
@@ -45,7 +46,8 @@ def gen_qr_codes(error_level, dst_dir, urls_list=[], json_path=""):
         image.save(directory + "\\" + url.split('.com/')[1] + ".png")
         qr.clear()
 
-def getRestaurantsList(json_path)-> list:
+
+def getRestaurantsList(json_path) -> list:
     """
     Devuelve la lista de restaurantes ordenada
     """
@@ -53,3 +55,20 @@ def getRestaurantsList(json_path)-> list:
         data = json.load(jsonf)
     restaurants = data["restaurants"]
     return sorted(restaurants, key=lambda restaurant: restaurant["order"])
+
+
+if __name__ == "__main__":
+    from InquirerPy import inquirer, get_style, validator
+    print("Bienvenido al creador de QRs")
+    urls = inquirer.text(
+		message="Ingrese las URLS de las cuales quiere generar QRs (Separadas por comas):",
+		default="http://burgerweekbolivia.com"
+	).execute().split(",")
+    dst = inquirer.filepath(
+        message="Dónde desea guardar los qrs generados?:",
+		only_directories=True
+    ).execute()
+    gen_qr_codes("L", dst, urls)
+    gen_qr_codes("M", dst, urls)
+    gen_qr_codes("Q", dst, urls)
+    gen_qr_codes("H", dst, urls)
