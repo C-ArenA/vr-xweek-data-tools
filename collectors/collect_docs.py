@@ -86,6 +86,7 @@ def find_docs_in_folder(folder: str) -> list:
 
 def find_docs_in_folder_ui_wrapper():
     from InquirerPy import inquirer, get_style, validator
+    from InquirerPy.base.control import Choice
     style = get_style({"questionmark": "#ff3355", "answer": "#0055ff"}, style_override=False)
     print("Este es el asistente para encontrar los archivos word dentro de una carpeta")
     src_path = inquirer.filepath(
@@ -96,10 +97,12 @@ def find_docs_in_folder_ui_wrapper():
     accepted_docs = []
     print(f'Se encontraron {len(found_docs)} documentos de word dentro de la carpeta {src_path}\n')
     if len(found_docs) > 0:
-        print(f'A continuación seleccione los documentos relevantes para procesar (con tecla espacio), deje deseleccionados los que no sean necesarios\n')
+        
+        print(f'A continuación deseleccione los documentos que están por demás (con tecla espacio), deje seleccionados los demás\n')
+        
         accepted_docs = inquirer.checkbox(
-            message="Selecciones docs necesarios:",
-            choices=[doc["file"] for doc in found_docs]
+            message="Deseleccione docs innecesarios:",
+            choices=[Choice(doc, name=doc["file"], enabled=True) for doc in found_docs]
         ).execute()
     
     extradoc = inquirer.confirm(
@@ -123,9 +126,10 @@ def find_docs_in_folder_ui_wrapper():
         extradoc = inquirer.confirm(
             message="Desea ingresar otro doc extra manualmente?"
         ).execute()
-    print("Los documentos finales son:\n")
+    print("Los documentos encontrados finales son:\n")
     for doc in accepted_docs:
         print(doc["path"])
+    return accepted_docs
 
 def collect_docs_with_help():
     """
