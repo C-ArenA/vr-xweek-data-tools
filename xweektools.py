@@ -53,9 +53,9 @@ def update_data(xweekconfig, xweekevent, xweekpastevent):
     """Ayuda al usuario a actualizar los datos del evento
 
     Args:
-        xweekconfig (_type_): _description_
-        xweekevent (_type_): _description_
-        xweekpastevent (_type_): _description_
+        xweekconfig (_type_): Objeto config de la aplicación
+        xweekevent (_type_): Evento nuevo
+        xweekpastevent (_type_): Último evento registrado
     """
     # --- 1. Nombre del Evento
     xweekevent["event_name"] = inquirer.text(

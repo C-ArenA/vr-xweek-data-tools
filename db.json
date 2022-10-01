@@ -1,6 +1,61 @@
 {
 	"xweekconfig": {
 		"execution": 0,
+		"event_defaults": [
+			{
+				"name": "Burger Week", 
+				"abbreviation": "bw",
+				"domain": "http://burgerweekbolivia.com"
+			}, 
+			{
+				"name": "Pizza Week", 
+				"abbreviation": "pw",
+				"domain": "https://pizzaweekbolivia.com"
+			},
+			{
+				"name": "Restaurant Week", 
+				"abbreviation": "rw",
+				"domain": "http://restaurantweekbolivia.com"
+			}
+		],
+		"event_default_locations": [
+			{
+				"name": "La Paz",
+				"abbreviation": "lp"
+			},
+			{
+				"name": "Cochabamba",
+				"abbreviation": "cb"
+			},
+			{
+				"name": "Santa Cruz",
+				"abbreviation": "sc"
+			},
+			{
+				"name": "Oruro",
+				"abbreviation": "or"
+			},
+			{
+				"name": "Beni",
+				"abbreviation": "be"
+			},
+			{
+				"name": "Pando",
+				"abbreviation": "pn"
+			},
+			{
+				"name": "Potosí",
+				"abbreviation": "pt"
+			},
+			{
+				"name": "Tarija",
+				"abbreviation": "tj"
+			},
+			{
+				"name": "Sucre",
+				"abbreviation": "ch"
+			}
+		],
 		"event_names": [
 			"Burger Week",
 			"Pizza Week",
@@ -138,35 +193,37 @@
 			"photo_url": ""
 		}
 	},
-	"xweekdata": [{
-		"xweekevent": {
-			"event_name": "",
-			"event_location": "",
-			"event_location_abbreviation": "",
-			"event_version": 0,
-			"event_domain": "",
-			"event_long_description": "Descripción larga, aún no definida",
-			"event_short_description": "Descripción corta, aún no definida",
-			"event_calendar": "Del x al y de m (por definir)",
-			"event_media_url": "",
-			"restaurants": []
-		},
-		"xweeknow": "00-00-00",
-		"xweekpaths": {
-			"event_dir": "",
-			"data_src": "",
-			"photos_src": "",
-			"logos_src": "",
-			"temp": "./TEMP",
-			"docs_dst_dir": "./TEMP/docs",
-			"docs_path_list": [],
-			"txts_dst_dir": "./TEMP/txts",
-			"txts_path_list": [],
-			"photos_dst_dir": "./TEMP/photos",
-			"logos_dst_dir": "./TEMP/logos",
-			"qrs_dst_dir": "./TEMP/qrs",
-			"json_path": "./TEMP/data.json"
+	"xweekevents": [
+		{
+			"data": {
+				"event_name": "",
+				"event_created": 0,
+				"event_location": "",
+				"event_location_abbreviation": "",
+				"event_version": 0,
+				"event_domain": "",
+				"event_long_description": "Descripción larga, aún no definida",
+				"event_short_description": "Descripción corta, aún no definida",
+				"event_calendar": "Del x al y de m (por definir)",
+				"event_media_url": "",
+				"restaurants": []
+			},
+			"now": "00-00-00",
+			"paths": {
+				"event_dir": "",
+				"data_src": "",
+				"photos_src": "",
+				"logos_src": "",
+				"temp": "./TEMP",
+				"docs_dst_dir": "./TEMP/docs",
+				"docs_path_list": [],
+				"txts_dst_dir": "./TEMP/txts",
+				"txts_path_list": [],
+				"photos_dst_dir": "./TEMP/photos",
+				"logos_dst_dir": "./TEMP/logos",
+				"qrs_dst_dir": "./TEMP/qrs",
+				"json_path": "./TEMP/data.json"
+			}
 		}
-	}
 	]
 }

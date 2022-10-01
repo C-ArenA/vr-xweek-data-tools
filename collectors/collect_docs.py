@@ -4,18 +4,16 @@ import glob
 import shutil  # To make operations on many files (os on steroids)
 
 
-def collect_docs(rest_folders_paths: list, collected_docs_dir: str, delete_old: bool = True) -> list:
+def collect_docs_from_rest_folders(rest_folders_paths: list, collected_docs_dir: str, delete_old: bool = True) -> list:
     """
-    # Recolecta documentos word en una carpeta
+    # Recolecta documentos de word en las carpetas de los restaurantes
+	- El usuario debe verificar manualmente que los docs estén presentes o que no falte alguno
+    - La creación de la carpeta no depende de esta función y si no existe se retorna un error
+    - Si el parámetro delete_old es True se borra el contenido anterior de la carpeta de destino (si existe)
 
-    La creación de la carpeta no depende de esta función y si no existe se retorna un error
-        Si el parámetro delete_old es True se borra el contenido anterior de la carpeta de destino (si existe)
-
-
-
-        Retorna un objeto con dos listas:
-        docs path antiguo
-        docs path nuevo
+	Retorna un objeto con dos listas:
+	docs path antiguo
+	docs path nuevo
     """
 
     # -------------- Verifico que el directorio de destino existe
@@ -131,14 +129,7 @@ def find_docs_in_folder_ui_wrapper():
         print(doc["path"])
     return accepted_docs
 
-def collect_docs_with_help():
-    """
-    # Recolecta documentos word en una carpeta
-
-    Retorna un objeto con dos listas:
-    docs path antiguo
-    docs path nuevo
-    """
+def save_docs(docs_list, docs_dst):
     pass
     # Recibo el directorio dentro del cual debo buscar archivos de word
     # Verifico que sea correcto
