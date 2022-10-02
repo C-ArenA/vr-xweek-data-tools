@@ -38,6 +38,7 @@ class View:
                 Choice(1, "Crear nuevo evento"),
                 Choice(2, "Actualizar datos del evento"),
                 Choice(3, "Encontrar docs del evento"),
+                Choice(30, "Actualizar lista de docs del evento"),
                 Choice(4, "Encontrar y copiar docs del evento"),
                 Choice(5, "Encontrar imágenes del evento"),
                 Choice(6, "Encontrar y copiar imágenes del evento"),
