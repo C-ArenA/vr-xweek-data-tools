@@ -17,8 +17,8 @@ class Controller:
         self.view.show_event_data(new_event)
         
 if __name__ == "__main__":
-    from view import View
-    from model import Model
+    from xweekdatatools.views.view import View
+    from xweekdatatools.models.model import Model
 
     controller = Controller()
     view = View(controller)

@@ -29,7 +29,7 @@ class Model:
             json.dump(self.db, db_file, ensure_ascii=False, indent=4)
         
 if __name__ == "__main__":
-    from view import View
+    from xweekdatatools.views.view import View
     view = View()
     model = Model(view, "db.json")
     view.show_event_data(model.get_last_event_data())

@@ -1,0 +1,229 @@
+{
+	"xweekconfig": {
+		"execution": 0,
+		"event_defaults": [
+			{
+				"name": "Burger Week", 
+				"abbreviation": "bw",
+				"domain": "http://burgerweekbolivia.com"
+			}, 
+			{
+				"name": "Pizza Week", 
+				"abbreviation": "pw",
+				"domain": "https://pizzaweekbolivia.com"
+			},
+			{
+				"name": "Restaurant Week", 
+				"abbreviation": "rw",
+				"domain": "http://restaurantweekbolivia.com"
+			}
+		],
+		"event_default_locations": [
+			{
+				"name": "La Paz",
+				"abbreviation": "lp"
+			},
+			{
+				"name": "Cochabamba",
+				"abbreviation": "cb"
+			},
+			{
+				"name": "Santa Cruz",
+				"abbreviation": "sc"
+			},
+			{
+				"name": "Oruro",
+				"abbreviation": "or"
+			},
+			{
+				"name": "Beni",
+				"abbreviation": "be"
+			},
+			{
+				"name": "Pando",
+				"abbreviation": "pn"
+			},
+			{
+				"name": "Potosí",
+				"abbreviation": "pt"
+			},
+			{
+				"name": "Tarija",
+				"abbreviation": "tj"
+			},
+			{
+				"name": "Sucre",
+				"abbreviation": "ch"
+			}
+		],
+		"event_names": [
+			"Burger Week",
+			"Pizza Week",
+			"Restaurant Week"
+		],
+		"event_domains": [
+			"http://burgerweekbolivia.com",
+			"https://pizzaweekbolivia.com",
+			"http://restaurantweekbolivia.com"
+		],
+		"event_locations": [
+			"La Paz",
+			"Santa Cruz",
+			"Cochabamba",
+			"Oruro",
+			"Beni",
+			"Tarija",
+			"Pando",
+			"Potosí",
+			"Sucre"
+		],
+		"event_locations_abbreviations": [
+			"lp",
+			"sc",
+			"cb",
+			"or",
+			"bn",
+			"tj",
+			"pd",
+			"pt",
+			"su"
+		],
+		"rest_data_separators": [
+			{
+				"for": "dish",
+				"key": "name",
+				"emoji": "🍽️"
+			},
+			{
+				"for": "dish",
+				"key": "name",
+				"emoji": "🍽"
+			},
+			{
+				"for": "dish",
+				"key": "description",
+				"emoji": "🍕"
+			},
+			{
+				"for": "dish",
+				"key": "description",
+				"emoji": "🍔"
+			},
+			{
+				"for": "dish",
+				"key": "accompaniment",
+				"emoji": "🍟"
+			},
+			{
+				"for": "dish",
+				"key": "drinks",
+				"emoji": "🍺"
+			},
+			{
+				"for": "dish",
+				"key": "pairing",
+				"emoji": "🥤"
+			},
+			{
+				"for": "dish",
+				"key": "price",
+				"emoji": "💵"
+			},
+			{
+				"for": "restaurant",
+				"key": "address",
+				"emoji": "📍"
+			},
+			{
+				"for": "restaurant",
+				"key": "phone",
+				"emoji": "☎️"
+			},
+			{
+				"for": "restaurant",
+				"key": "phone",
+				"emoji": "☎"
+			},
+			{
+				"for": "restaurant",
+				"key": "opening_hours",
+				"emoji": "⏰"
+			},
+			{
+				"for": "restaurant",
+				"key": "delivery",
+				"emoji": "🚚"
+			}
+		],
+		"xweekevent_blank": {
+			"event_name": "",
+			"event_location": "",
+			"event_location_abbreviation": "",
+			"event_version": 0,
+			"event_domain": "",
+			"event_long_description": "Descripción larga, aún no definida",
+			"event_short_description": "Descripción corta, aún no definida",
+			"event_calendar": "Del x al y de m (por definir)",
+			"event_media_url": "",
+			"restaurants": []
+		},
+		"restaurant_blank": {
+			"order": 0,
+			"name": "",
+			"address": "",
+			"phone": "",
+			"opening_hours": "",
+			"delivery": "",
+			"slugified_name": "",
+			"post_title": "",
+			"post_name": "",
+			"post_url": "",
+			"logo_name": "",
+			"logo_url": "",
+			"dishes": []
+		},
+		"dish_blank": {
+			"name": "",
+			"description": "",
+			"accompaniment": "",
+			"drinks": "",
+			"pairing": "",
+			"price": "",
+			"photo_name": "",
+			"photo_url": ""
+		}
+	},
+	"xweekevents": [
+		{
+			"data": {
+				"event_name": "",
+				"event_created": 0,
+				"event_location": "",
+				"event_location_abbreviation": "",
+				"event_version": 0,
+				"event_domain": "",
+				"event_long_description": "Descripción larga, aún no definida",
+				"event_short_description": "Descripción corta, aún no definida",
+				"event_calendar": "Del x al y de m (por definir)",
+				"event_media_url": "",
+				"restaurants": []
+			},
+			"now": "00-00-00",
+			"paths": {
+				"event_dir": "",
+				"data_src": "",
+				"photos_src": "",
+				"logos_src": "",
+				"temp": "./TEMP",
+				"docs_dst_dir": "./TEMP/docs",
+				"docs_path_list": [],
+				"txts_dst_dir": "./TEMP/txts",
+				"txts_path_list": [],
+				"photos_dst_dir": "./TEMP/photos",
+				"logos_dst_dir": "./TEMP/logos",
+				"qrs_dst_dir": "./TEMP/qrs",
+				"json_path": "./TEMP/data.json"
+			}
+		}
+	]
+}
