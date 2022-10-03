@@ -1,15 +1,24 @@
-import os, json
+# For TYPE CHECKING ------------------
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+	from xweekdatatools.controllers import Controller
+# ------------------------------------
+
+import os
+import json
+from pathlib import Path
 from yachalk import chalk
 from InquirerPy import inquirer, get_style, validator
 from InquirerPy.base.control import Choice
 style = get_style({"question": "#ff3355", "questionmark": "#ff3355",
                   "answer": "#0055ff"}, style_override=False)
 
+
 class View:
-    def __init__(self, controller) -> None:
+    def __init__(self, controller: Controller) -> None:
         self.controller = controller
-        
-    
+
     def init_ui(self):
         """
         Genera el encabezado de la UI
@@ -24,11 +33,12 @@ class View:
         print(chalk.blue.bold(
             "-------------------------------------------------------------\n"))
 
-    def show_event_data(self, event_data:dict):
+    def show_event_data(self, event_data: dict):
         self.init_ui()
-        print(f'Estos son los datos del evento "{event_data["event_name"]}" - "{event_data["event_location"]}" Versión {event_data["event_version"]}, creado el {event_data["event_created"]}:')
+        print(
+            f'Estos son los datos del evento "{event_data["event_name"]}" - "{event_data["event_location"]}" Versión {event_data["event_version"]}, creado el {event_data["event_created"]}:')
         print(chalk.green(json.dumps(event_data, indent=2, ensure_ascii=False)))
-        
+
     def select_main_action(self):
         self.init_ui()
         action = inquirer.select(
@@ -55,8 +65,7 @@ class View:
         if action == 1:
             print("CREAR!!!\n")
             self.controller.create_event()
-            
-    
+
     def insert_event_data(self, xweekconfig, xweekevent, xweekpastevent):
         """Ayuda al usuario a actualizar los datos del evento
 
@@ -65,7 +74,7 @@ class View:
             xweekevent (_type_): Evento nuevo
             xweekpastevent (_type_): Último evento registrado
         """
-        
+
         # --- 1. Nombre del Evento
         xweekevent["event_name"] = inquirer.text(
             message="Nombre del Evento:",
@@ -105,14 +114,21 @@ class View:
         xweekevent["event_domain"] = inquirer.text(
             message="Dominio Web del evento:",
             default=default_domain,
-            completer={dom:None for dom in xweekconfig["event_domains"]},
+            completer={dom: None for dom in xweekconfig["event_domains"]},
             multicolumn_complete=True
         ).execute()
-           
-    def no_model(self, db_path):
+
+    def no_model(self, db_path: Path):
         self.init_ui()
-        print(chalk.red.bold("ERROR GRAVE: No se pudo conectar con la base de datos en " + db_path))
+        print(chalk.red.bold(
+            "ERROR GRAVE: No se pudo conectar con la base de datos en " + str(db_path)))
         print(chalk.red("Ejecución abortada"))
+
+    def has_model(self, db_path: Path):
+        self.init_ui()
+        print(chalk.green.bold(
+            "Base de datos conectada exitosamente en: " + str(db_path)))
+
 
 if __name__ == "__main__":
     view = View()
