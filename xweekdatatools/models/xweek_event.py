@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 import datetime
 
 
@@ -7,14 +7,15 @@ class XweekEvent:
     name: str
     name_abbreviation: str
     location: str
-    event_location_abbreviation: str
-    event_version: int
-    event_domain: str
-    event_media_url: str
-    event_long_description: str
-    event_short_description: str
-    event_calendar: str
+    location_abbreviation: str
+    version: int
+    domain: str
+    media_url: str
+    long_description: str
+    short_description: str
+    calendar: str
     restaurants: list
     created: str = datetime.datetime.now().strftime("%d-%m-%y_%H-%M-%S")
-    
-    
+
+    def to_dict(self):
+        return asdict(self)

@@ -56,38 +56,6 @@
 				"abbreviation": "ch"
 			}
 		],
-		"event_names": [
-			"Burger Week",
-			"Pizza Week",
-			"Restaurant Week"
-		],
-		"event_domains": [
-			"http://burgerweekbolivia.com",
-			"https://pizzaweekbolivia.com",
-			"http://restaurantweekbolivia.com"
-		],
-		"event_locations": [
-			"La Paz",
-			"Santa Cruz",
-			"Cochabamba",
-			"Oruro",
-			"Beni",
-			"Tarija",
-			"Pando",
-			"Potosí",
-			"Sucre"
-		],
-		"event_locations_abbreviations": [
-			"lp",
-			"sc",
-			"cb",
-			"or",
-			"bn",
-			"tj",
-			"pd",
-			"pt",
-			"su"
-		],
 		"rest_data_separators": [
 			{
 				"for": "dish",

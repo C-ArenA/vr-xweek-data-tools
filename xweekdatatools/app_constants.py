@@ -1,0 +1,17 @@
+import enum
+class AppActions(enum.Enum):
+    COMPLETE_PROCESS = enum.auto()
+    CREATE_NEW_EVENT = enum.auto()
+    UPDATE_EVENT_DATA = enum.auto()
+    FIND_EVENT_DOCS = enum.auto()
+    UPDATE_EVENT_DOCS_LIST = enum.auto()
+    FIND_EVENT_IMAGES = enum.auto()
+    COLLECT_EVENT_IMAGES = enum.auto()
+    CONVERT_DOCS2TXT = enum.auto()
+    NORMALIZE_TXT = enum.auto()
+    CONVERT_TXT2DATA = enum.auto()
+    GEN_EVENT_JSON = enum.auto()
+    GEN_EVENT_CSV = enum.auto()
+    GEN_EVENT_XLSX = enum.auto()
+    GEN_EVENT_QRS = enum.auto()
+    EXIT = enum.auto()

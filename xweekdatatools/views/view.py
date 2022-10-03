@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-	from xweekdatatools.controllers import Controller
+    from xweekdatatools.controllers import Controller
 # ------------------------------------
 
 import os
@@ -13,7 +13,7 @@ from InquirerPy import inquirer, get_style, validator
 from InquirerPy.base.control import Choice
 style = get_style({"question": "#ff3355", "questionmark": "#ff3355",
                   "answer": "#0055ff"}, style_override=False)
-
+from xweekdatatools.app_constants import AppActions
 
 class View:
     def __init__(self, controller: Controller) -> None:
@@ -35,36 +35,42 @@ class View:
 
     def show_event_data(self, event_data: dict):
         self.init_ui()
-        print(
-            f'Estos son los datos del evento "{event_data["event_name"]}" - "{event_data["event_location"]}" Versión {event_data["event_version"]}, creado el {event_data["event_created"]}:')
+        print('Estos son los datos del evento',
+              f'"{event_data["event_name"]}" - "{event_data["event_location"]}"',
+              f'Versión {event_data["event_version"]}, creado el {event_data["event_created"]}:')
         print(chalk.green(json.dumps(event_data, indent=2, ensure_ascii=False)))
 
     def select_main_action(self):
+        
         self.init_ui()
         action = inquirer.select(
             message="Elija una opción para proceder:",
             choices=[
-                Choice(0, "REALIZAR PROCESO COMPLETO", enabled=True),
-                Choice(1, "Crear nuevo evento"),
-                Choice(2, "Actualizar datos del evento"),
-                Choice(3, "Encontrar docs del evento"),
-                Choice(30, "Actualizar lista de docs del evento"),
-                Choice(4, "Encontrar y copiar docs del evento"),
-                Choice(5, "Encontrar imágenes del evento"),
-                Choice(6, "Encontrar y copiar imágenes del evento"),
-                Choice(7, "Convertir docs a texto plano"),
-                Choice(8, "Normalizar textos planos manualmente"),
-                Choice(9, "Convertir texto plano a datos de restaurantes del evento"),
-                Choice(10, "Generar JSON del evento"),
-                Choice(11, "Generar CSV y XLSX de urls de los restaurantes"),
-                Choice(12, "Generar QRs los restaurantes")
+                Choice(AppActions.COMPLETE_PROCESS, "REALIZAR PROCESO COMPLETO", enabled=True),
+                Choice(AppActions.CREATE_NEW_EVENT, "Crear nuevo evento"),
+                Choice(AppActions.UPDATE_EVENT_DATA, "Actualizar datos del evento"),
+                Choice(AppActions.FIND_EVENT_DOCS, "Encontrar docs del evento"),
+                Choice(AppActions.UPDATE_EVENT_DOCS_LIST, "Actualizar lista de docs del evento"),
+                Choice(-1, "Encontrar y copiar docs del evento"),
+                Choice(AppActions.FIND_EVENT_IMAGES, "Encontrar imágenes del evento"),
+                Choice(AppActions.COLLECT_EVENT_IMAGES, "Encontrar y copiar imágenes del evento"),
+                Choice(AppActions.CONVERT_DOCS2TXT, "Convertir docs a texto plano"),
+                Choice(AppActions.NORMALIZE_TXT, "Normalizar textos planos manualmente"),
+                Choice(AppActions.CONVERT_TXT2DATA, "Convertir texto plano a datos de restaurantes del evento"),
+                Choice(AppActions.GEN_EVENT_JSON, "Generar JSON del evento"),
+                Choice(AppActions.GEN_EVENT_XLSX, "Generar CSV y XLSX de urls de los restaurantes"),
+                Choice(AppActions.GEN_EVENT_QRS, "Generar QRs los restaurantes"),
+                Choice(AppActions.EXIT, "SALIR")
             ],
             default=0,
             style=style
         ).execute()
-        if action == 1:
-            print("CREAR!!!\n")
-            self.controller.create_event()
+        self.controller.choose_action(action)
+        
+    def pending_functionality(self):
+        print("No podemos hacer eso aún :(")
+        print("Elija otra opción por favor")
+        self.select_main_action()
 
     def insert_event_data(self, xweekconfig, xweekevent, xweekpastevent):
         """Ayuda al usuario a actualizar los datos del evento

@@ -2,6 +2,7 @@ from xweekdatatools.controllers import Controller
 from xweekdatatools.models import Model
 from xweekdatatools.views import View
 
+    
 class App:
     def __init__(self) -> None:
         controller = Controller()
