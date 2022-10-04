@@ -34,8 +34,7 @@ class Controller:
         new_event = {
             "event_created": datetime.datetime.now().strftime("%d%m%y_%H%M%S")
         }
-        self.view.insert_event_data(self.model.get_config(
-        ), new_event, self.model.get_last_event_data())
+        self.view.insert_event_data(self.model.xweekconfig, self.model.last_event)
         self.view.show_event_data(new_event)
 
     def choose_action(self, action: AppActions):

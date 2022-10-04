@@ -93,10 +93,10 @@ class View:
         """
         xweekevent = {}
         # --- 1. Nombre del Evento
-        xweekevent["event_name"] = inquirer.text(
+        xweekevent["name"] = inquirer.text(
             message="Nombre del Evento:",
-            default=xweeklastevent["event_name"],
-            completer={name: None for name in xweekconfig["event_names"]},
+            default=xweeklastevent["name"],
+            completer={default["name"]: None for default in xweekconfig["event_defaults"]},
             multicolumn_complete=True).execute()
         # --- 2. Lugar del Evento
         xweekevent["event_location"] = inquirer.text(

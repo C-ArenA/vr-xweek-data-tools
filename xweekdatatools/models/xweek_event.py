@@ -3,11 +3,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 import datetime
 from xweekdatatools.models.xweek_restaurant import XweekRestaurant
-
 from xweekdatatools.models import Model
-import json
-import sys
-
 
 @dataclass
 class XweekEvent(Model):
