@@ -40,11 +40,11 @@ class Controller:
 
     def choose_action(self, action: AppActions):
         actions = {
-            appAction: appAction.value for appAction in AppActions
+            appAction: self.view.pending_functionality for appAction in AppActions
         }
-        actions[AppActions.CREATE_NEW_EVENT] = "Crear Aplicación :D"
+        actions[AppActions.CREATE_NEW_EVENT] = self.create_new_event
         if type(action) is AppActions:
-            print(actions[action])
-            self.chosen_action = actions[action]
+            self.chosen_action = action
+            actions[action]()
         else:
             self.view.pending_functionality()

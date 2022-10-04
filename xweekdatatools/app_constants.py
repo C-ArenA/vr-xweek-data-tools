@@ -1,4 +1,6 @@
 import enum
+
+DB_FILE_PATH = "./xweekdatatools/db.json"
 class AppActions(enum.Enum):
     COMPLETE_PROCESS = enum.auto()
     CREATE_NEW_EVENT = enum.auto()
@@ -15,3 +17,57 @@ class AppActions(enum.Enum):
     GEN_EVENT_XLSX = enum.auto()
     GEN_EVENT_QRS = enum.auto()
     EXIT = enum.auto()
+
+
+REST_DATA_SEPARATORS = [
+    {
+        "context": "dish",
+        "key": "name",
+        "emojis": ["🍽️", "🍽"]
+    },
+    {
+        "context": "dish",
+        "key": "description",
+        "emojis": ["🍕", "🍔"]
+    },
+    {
+        "context": "dish",
+        "key": "accompaniment",
+        "emoji": "🍟"
+    },
+    {
+        "context": "dish",
+        "key": "drinks",
+        "emoji": "🍺"
+    },
+    {
+        "context": "dish",
+        "key": "pairing",
+        "emoji": "🥤"
+    },
+    {
+        "context": "dish",
+        "key": "price",
+        "emoji": "💵"
+    },
+    {
+        "context": "restaurant",
+        "key": "address",
+        "emoji": "📍"
+    },
+    {
+        "context": "restaurant",
+        "key": "phone",
+        "emojis": ["☎️", "☎"]
+    },
+    {
+        "context": "restaurant",
+        "key": "opening_hours",
+        "emoji": "⏰"
+    },
+    {
+        "context": "restaurant",
+        "key": "delivery",
+        "emoji": "🚚"
+    }
+]
