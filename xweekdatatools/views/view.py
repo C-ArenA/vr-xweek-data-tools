@@ -1,9 +1,9 @@
 # For TYPE CHECKING ------------------
 from __future__ import annotations
-from xweekdatatools.app_constants import AppActions
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from xweekdatatools.controllers import Controller
+    from xweekdatatools.models import XweekEvent
 # ------------------------------------
 
 import os
@@ -15,6 +15,7 @@ from InquirerPy.base.control import Choice
 style = get_style({"question": "#ff3355", "questionmark": "#ff3355",
                   "answer": "#0055ff"}, style_override=False)
 
+from xweekdatatools.app_constants import AppActions
 
 class View:
     def __init__(self, controller: Controller) -> None:
@@ -74,7 +75,7 @@ class View:
                        "Generar QRs los restaurantes"),
                 Choice(AppActions.EXIT, "SALIR")
             ],
-            default=0,
+            default=AppActions.COMPLETE_PROCESS,
             style=style
         ).execute()
         self.controller.choose_action(action)
@@ -96,7 +97,8 @@ class View:
         xweekevent["name"] = inquirer.text(
             message="Nombre del Evento:",
             default=xweeklastevent["name"],
-            completer={default["name"]: None for default in xweekconfig["event_defaults"]},
+            completer={
+                default["name"]: None for default in xweekconfig["event_defaults"]},
             multicolumn_complete=True).execute()
         # --- 2. Lugar del Evento
         xweekevent["event_location"] = inquirer.text(
@@ -145,6 +147,74 @@ class View:
         self.init_ui()
         print(chalk.green.bold(
             "Base de datos conectada exitosamente en: " + str(db_path)))
+
+    def select_event(self, events_list: list[XweekEvent]) -> int:
+        """UI para seleccionar (por ID) un evento de una lista de eventos
+
+        Args:
+            events_list (list[XweekEvent]): Lista de eventos sobre los cuales seleccionar
+
+        Returns:
+            int: ID del evento seleccionado o None si nada fue seleccionado
+        """
+        choices = [Choice(event.id, event.summary()) for event in events_list]
+        return inquirer.select(
+            message="Seleccione el evento sobre el cual trabajar",
+            choices=choices,
+            default=events_list[-1].id
+        ).execute()
+        
+
+    def find_docs_ui(self, current_event=None):
+        if current_event is None:
+            current_event = self.select_event()
+
+        print(
+            "Este es el asistente para encontrar los archivos word dentro de una carpeta")
+        src_path = inquirer.filepath(
+            message="Dentro de qué carpeta desea buscar los archivos de word (Puede arrastrar y soltar):",
+            only_directories=True
+        ).execute()
+        found_docs = current_event.src_path.rglob("*.doc*")
+        accepted_docs = []
+        print(
+            f'Se encontraron {len(found_docs)} documentos de word dentro de la carpeta {src_path}\n')
+        if len(found_docs) > 0:
+            print(
+                f'A continuación deseleccione los documentos que están por demás (con tecla espacio), deje seleccionados los demás\n')
+
+            accepted_docs = inquirer.checkbox(
+                message="Deseleccione docs innecesarios:",
+                choices=[Choice(doc, name=doc["file"], enabled=True)
+                         for doc in found_docs]
+            ).execute()
+
+        extradoc = inquirer.confirm(
+            message="Desea ingresar doc extra manualmente?"
+        ).execute()
+        while extradoc:
+            new_file = inquirer.filepath(
+                message="Ingrese doc extra manualmente (Puede arrastrar):",
+                only_files=True,
+            ).execute()
+            file_name, file_ext = os.path.splitext(new_file)
+            if file_ext[:4] == ".doc":
+                accepted_docs.append({
+                    "path": new_file,
+                    "file": os.path.basename(new_file),
+                    "name": file_name,
+                    "ext": file_ext
+                })
+            else:
+                print(
+                    "El archivo no es de tipo documento de word, no se acepta\n")
+            extradoc = inquirer.confirm(
+                message="Desea ingresar otro doc extra manualmente?"
+            ).execute()
+        print("Los documentos encontrados finales son:\n")
+        for doc in accepted_docs:
+            print(doc["path"])
+        return accepted_docs
 
 
 if __name__ == "__main__":

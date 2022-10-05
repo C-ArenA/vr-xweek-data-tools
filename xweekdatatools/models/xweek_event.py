@@ -1,12 +1,15 @@
 from __future__ import annotations
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
+from mimetypes import init
 from pathlib import Path
 import datetime
 from xweekdatatools.models.xweek_restaurant import XweekRestaurant
 from xweekdatatools.models import Model
+from xweekdatatools.utils import make_valid_path, json_serializable_path
 
 @dataclass
 class XweekEvent(Model):
+    MODEL_NAME_IN_JSON = "xweekevents"
     # ********* Mandatory ***********:
     id: int = None
     name: str = ""
@@ -29,15 +32,13 @@ class XweekEvent(Model):
     dst_path: Path = None
     docs_path_list: list[Path] = field(default_factory=list)
     txts_path_list: list[Path] = field(default_factory=list)
-
-    def __post_init__(self):
-        super().__post_init__()
-        self.id = self.__next_id() if self.id is None else self.id
+        
+    # SECTION ------------ DB OPERATIONS -----------------
 
     @classmethod
     def getAll(cls) -> list[XweekEvent]:
         db = cls.get_current_db_state()
-        return [cls(**event) for event in db["xweekevents"]]
+        return [cls(**event) for event in db[cls.MODEL_NAME_IN_JSON]]
 
     @classmethod
     def getById(cls, id) -> XweekEvent:
@@ -46,48 +47,16 @@ class XweekEvent(Model):
             if event["id"] == id:
                 return cls(**event)
         return None
-    
+
     @classmethod
     def removeById(cls, id):
         cls.db = cls.get_current_db_state()
         index_to_remove = None
         for i, event in enumerate(cls.db["xweekevents"]):
             if event["id"] == id:
-                index_to_remove = i                
+                index_to_remove = i
         cls.db["xweekevents"].pop(index_to_remove)
         super().save(cls)
-
-
-    
-    def to_dict(self):
-        """Devuelve un diccionario con todos los atributos a 
-        excepción de aquellos de la clase padre"""
-        current_dict = asdict(self)
-        for key in super().__dataclass_fields__.keys():
-            del current_dict[key]
-        return current_dict
-
-    def to_end_dict(self):
-        """Devuelve un diccionario del evento listo para poblar la base de datos
-        * Utiliza el atributo "repr" (=True) de los fields del dataclass para
-        decidir qué atributos son aceptados
-        * Aquí se procesan los campos que automaticamente no dan algo coherente
-        para la base de datos
-
-        Returns:
-            dict: Diccionario listo, completo y con el formato deseado
-        """
-        current_dict = asdict(self)
-        for key in self.__dataclass_fields__:
-            value = self.__dataclass_fields__[key]
-            if value.type == 'Path':
-                if getattr(self, key) is None:
-                    current_dict[key] = ""
-                else:
-                    current_dict[key] = str(getattr(self, key).absolute())
-            if not value.repr:
-                del current_dict[key]
-        return current_dict
 
     @classmethod
     def reset_all(cls):
@@ -98,26 +67,42 @@ class XweekEvent(Model):
         cls.db["xweekevents"].append(cls(id=0).to_end_dict())
         super().save(cls)
 
-    def __next_id(self) -> int:
-        g_id = 0
-        for event in self.getAll():
-            if event.id > g_id:
-                g_id = event.id
-        return g_id + 1
-    
     def save(self):
         """Guarda el evento (nuevo o actualizado) en la base de datos
         """
         self.load()
-        
+        # Si el ID del evento no es válido (es None o no es int) se aborta
+        if type(self.id) != int:
+            print(f'Evento no pudo ser creado por ID inválido')
+            return
         # Se actualiza evento si ID ya existe
         for index, event in enumerate(self.getAll()):
             if event.id == self.id:
                 self.xweekevents[index] = self.to_end_dict()
                 super().save()
                 print(f'Evento {event.id} actualizado')
-                return                
+                return
         # Se crea evento si ID no existe
-        self.xweekevents.append(self.to_end_dict())     
-        print(f'Evento {event.id} creado')
+        self.xweekevents.append(self.json_serializable_dict())
         super().save()
+        print(f'Evento {self.id} creado')
+
+    # SECTION ------------ DATA OPERATIONS -----------------
+    
+    def to_dict(self):
+        """Devuelve un diccionario con todos los atributos a 
+        excepción de aquellos de la clase padre"""
+        current_dict = asdict(self)
+        for key in super().__dataclass_fields__.keys():
+            del current_dict[key]
+        return current_dict
+
+    
+
+    def summary(self) -> str:
+        """Devuelve un pequeño resumen de una instancia del evento
+
+        Returns:
+            str: Resumen de la instancia del evento
+        """
+        return f'{self.id}: {self.name} {self.location}, versión: {self.version}, modified: {self.modified}'

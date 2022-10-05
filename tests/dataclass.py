@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields
 
 
 @dataclass
@@ -10,10 +10,19 @@ class DataClass:
     def to_dict(self):
         return asdict(self)
 
-dc = DataClass(
-    input("ingrese a:"),
-    input("ingrese b:"),
-    input("ingrese c:")
-)
+# dc1 = DataClass(
+#     input("ingrese t:"),
+#     input("ingrese a:"),
+#     input("ingrese b:"),
+#     input("ingrese c:")
+# )
+dc_dict = {
+	"a": 5,
+	"b": 4,
+	"c": 3,	
+	"d": 2
+}
+dc = DataClass(**dc_dict)
 
 print(dc.to_dict())
+
