@@ -38,8 +38,15 @@ class XweekEvent(Model):
     @classmethod
     def getAll(cls) -> list[XweekEvent]:
         db = cls.get_current_db_state()
-        return [cls(**event) for event in db[cls.MODEL_NAME_IN_JSON]]
-
+        events = []
+        for event in db[XweekEvent.MODEL_NAME_IN_JSON]:
+            # Sólo se añaden a la lista si son datos válidos
+            try:
+                events.append(cls(**event))
+            except:
+                pass                
+        return events
+    
     @classmethod
     def getById(cls, id) -> XweekEvent:
         db = cls.get_current_db_state()
