@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field, fields
 from mimetypes import init
 from pathlib import Path
-import datetime
+
 from xweekdatatools.models.xweek_restaurant import XweekRestaurant
 from xweekdatatools.models import Model
 from xweekdatatools.utils import make_valid_path, json_serializable_path
@@ -11,8 +11,13 @@ from xweekdatatools.utils import make_valid_path, json_serializable_path
 class XweekEvent(Model):
     MODEL_NAME_IN_JSON = "xweekevents"
     # ********* Mandatory ***********:
-    id: int = None
-    name: str = ""
+    name: str = field(
+        default="", 
+        metadata={
+            "input_msg": "Ingrese el nombre del Evento",
+            "default": "Burger Week",
+            "config": "xweekconfig"
+            })
     location: str = ""
     version: int = 0
     domain: str = ""
@@ -27,55 +32,48 @@ class XweekEvent(Model):
     calendar: str = "Del x al y del z"
     # Optional or should be defined after creation
     restaurants: list[XweekRestaurant] = field(default_factory=list)
-    created: str = datetime.datetime.now().strftime("%d-%m-%y_%H-%M-%S")
-    modified: str = datetime.datetime.now().strftime("%d-%m-%y_%H-%M-%S")
+    
     dst_path: Path = None
-    docs_path_list: list[Path] = field(default_factory=list)
-    txts_path_list: list[Path] = field(default_factory=list)
+    docs_path_list: list[Path] = field(default_factory=list, metadata="a")
+    txts_path_list: list[Path] = field(default_factory=list, metadata={"a":5})
         
     # SECTION ------------ DB OPERATIONS -----------------
 
     @classmethod
     def getAll(cls) -> list[XweekEvent]:
-        db = cls.get_current_db_state()
+        cls.db_load()
         events = []
-        for event in db[XweekEvent.MODEL_NAME_IN_JSON]:
+        for event in cls.db[XweekEvent.MODEL_NAME_IN_JSON]:
             # Sólo se añaden a la lista si son datos válidos
             try:
                 events.append(cls(**event))
             except:
                 pass                
         return events
-    
-    @classmethod
-    def getById(cls, id) -> XweekEvent:
-        db = cls.get_current_db_state()
-        for event in db["xweekevents"]:
-            if event["id"] == id:
-                return cls(**event)
-        return None
+
 
     @classmethod
     def removeById(cls, id):
-        cls.db = cls.get_current_db_state()
+        cls.db_load()
         index_to_remove = None
-        for i, event in enumerate(cls.db["xweekevents"]):
+        for i, event in enumerate(cls.db[XweekEvent.MODEL_NAME_IN_JSON]):
             if event["id"] == id:
                 index_to_remove = i
-        cls.db["xweekevents"].pop(index_to_remove)
-        super().save(cls)
+        cls.db[XweekEvent.MODEL_NAME_IN_JSON].pop(index_to_remove)
+        cls.db_save()
 
     @classmethod
     def reset_all(cls):
-        """Resetea toda la lista de eventos
+        """Resetea toda la lista de eventos (CUIDADO!)
         """
-        cls.db = cls.get_current_db_state()
-        cls.db["xweekevents"] = list()
-        cls.db["xweekevents"].append(cls(id=0).to_end_dict())
-        super().save(cls)
+        cls.db_load()
+        cls.db[XweekEvent.MODEL_NAME_IN_JSON] = [cls(id=0).to_end_dict()]
+        cls.db_save()
 
     def save(self):
-        """Guarda el evento (nuevo o actualizado) en la base de datos
+        """Guarda la instancia del evento (nuevo o actualizado) en la base de datos
+        * Es nuevo si su id no existe ya en los otros eventos
+        * Es actualizado si su id consiste con alguno
         """
         self.load()
         # Si el ID del evento no es válido (es None o no es int) se aborta
@@ -85,27 +83,19 @@ class XweekEvent(Model):
         # Se actualiza evento si ID ya existe
         for index, event in enumerate(self.getAll()):
             if event.id == self.id:
-                self.xweekevents[index] = self.to_end_dict()
-                super().save()
+                self.db[XweekEvent.MODEL_NAME_IN_JSON][index] = self.json_serializable_dict()
+                self.db_save()
                 print(f'Evento {event.id} actualizado')
                 return
         # Se crea evento si ID no existe
-        self.xweekevents.append(self.json_serializable_dict())
-        super().save()
+        self.db[XweekEvent.MODEL_NAME_IN_JSON].append(self.json_serializable_dict())
+        self.db_save()
         print(f'Evento {self.id} creado')
 
     # SECTION ------------ DATA OPERATIONS -----------------
     
-    def to_dict(self):
-        """Devuelve un diccionario con todos los atributos a 
-        excepción de aquellos de la clase padre"""
-        current_dict = asdict(self)
-        for key in super().__dataclass_fields__.keys():
-            del current_dict[key]
-        return current_dict
-
     
-
+        
     def summary(self) -> str:
         """Devuelve un pequeño resumen de una instancia del evento
 

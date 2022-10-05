@@ -1,8 +1,8 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from xweekdatatools.models.xweek_event import XweekEvent
 from pathlib import Path
 from pprint import pprint
-
+from yachalk import chalk
 
 def create_event_test():
     # Para crear un evento se deja el id sin especificar
@@ -39,12 +39,20 @@ def json_serializable_test():
     
 def general():
     xwe = XweekEvent()
-    xwedict = XweekEvent.get_current_db_state()["xweekevents"][0]
-    if xwedict.keys() == xwe.json_serializable_dict().keys():
-        pprint("Yes")
+    print(repr(xwe))
 
 def json_correspondance_test():
     xwe = XweekEvent.getAll()[-1]
     pprint(xwe.print_fields_of_parent())
+    
+def check_xweek_event_fields():
+    for field in fields(XweekEvent):
+        print(chalk.red.bold(f'\n{field.name}:'))
+        print(chalk.blue("------------------------------"))
+        pprint(field)
 
-create_event_test()
+def read_by_id_test():
+    xwe = XweekEvent.getById(0)
+    print(xwe)
+
+read_by_id_test()

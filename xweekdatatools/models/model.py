@@ -1,6 +1,8 @@
 # For TYPE CHECKING ------------------
 from __future__ import annotations
 from typing import TYPE_CHECKING, Any
+
+
 if TYPE_CHECKING:
     from xweekdatatools.views import View
 # ------------------------------------
@@ -9,29 +11,31 @@ if TYPE_CHECKING:
 import os
 import sys
 import json
+import datetime
 from pathlib import Path
 from dataclasses import Field, asdict, dataclass, field, fields
 # ------------ THIRD PARTY LIBRARIES ------------
 # ------------ LOCAL IMPORTS --------------------
 from xweekdatatools.utils.path_helpers import json_serializable_path, make_valid_path
+from xweekdatatools.utils.db_helpers import get_db_dict_from_json_file_path
 from xweekdatatools.app_constants import DB_FILE_PATH
 
 
 @dataclass
 class Model():
+    # Class Attributes
+    db_file_path =Path(DB_FILE_PATH)
+    db = get_db_dict_from_json_file_path(db_file_path)
     # Cualquier instancia de un modelo de datos necesita tener un ID
     # (A excepción del Model original que se deja en None)
     id: int = None
-    db_file_path: Path = field(default=Path(
-        DB_FILE_PATH), init=False, repr=False)
-    db: dict = field(default_factory=dict, init=False, repr=False)
+    created: str = datetime.datetime.now().strftime("%d-%m-%y_%H-%M-%S")
+    modified: str = datetime.datetime.now().strftime("%d-%m-%y_%H-%M-%S")
+    # In case we need a View for our instance:
     view: View = field(default=None, init=False, repr=False)
-    xweekconfig: dict = field(default_factory=dict, init=False, repr=False)
-    xweekevents: dict = field(default_factory=dict, init=False, repr=False)
-    last_event: dict = field(default_factory=dict, init=False, repr=False)
 
     def __post_init__(self):
-        self.load()
+        self.db_load()
         # Aquí nos aseguramos que todas las instancias de Model (y sus hijos) 
         # tengan atributos válidos en sus fields.
         for attr_field in fields(self):
@@ -44,6 +48,7 @@ class Model():
 
     def set_view(self, view):
         self.view = view
+        
 
     @classmethod
     def get_current_db_state(cls) -> dict:
@@ -54,24 +59,52 @@ class Model():
             sys.exit("No se pueded abrir base de datos :(")
             print("No se puede abrir el JSON")
             return dict()
-    # THESE FUNCTIONS DOESN'T FOLLOW THE FUNCTIONAL PARADIGMS, they are dangerous:
 
-    def load(self):
-        """Carga la base de datos en el dict "db" y en las variables de ayuda
-        Las variables de ayuda son las que nos permiten acceder facilmente a
-        config o a events.
+    @classmethod
+    def db_load(cls) -> dict:
+        """Carga la base de datos en el dict "db"
+        
+        Se debe usar cada vez que se desee hacer una modificación o lectura 
+        a la base de datos para hacerla sobre la versión más actualizada
+        
+        Returns:
+            dict: Se retorna "db"
         """
-        self.db = self.get_current_db_state()
-        if self.db is None:
-            sys.exit("No se puede continuar sin una conexión a la base de datos")
-        self.xweekconfig = self.db["xweekconfig"]
-        self.xweekevents = self.db["xweekevents"]
-        self.last_event = self.xweekevents[-1]
+        cls.db = get_db_dict_from_json_file_path(cls.db_file_path)
+        if cls.db is None:
+            sys.exit("No se puede continuar sin una base de datos válida")
+        return cls.db
 
-    def save(self):
-        with open(self.db_file_path, "w", encoding="utf-8") as db_file:
-            json.dump(self.db, db_file, ensure_ascii=False, indent=4)
-
+    @classmethod
+    def db_save(cls) -> dict:
+        """Guarda el dict "db" en la base de datos
+        
+        Se puede usar después de hacer cambios en el dict db para guardarlos 
+        en la base de datos
+        
+        Cada modelo puede tener su propia implementación que asegure cambios
+        relacionados a su modelo y que se esté trabajando sobre la versión más
+        actualizada de la base de datos
+        
+        Returns:
+            dict: Se retorna "db"
+        """
+        with open(cls.db_file_path, "w", encoding="utf-8") as db_file:
+            json.dump(cls.db, db_file, ensure_ascii=False, indent=4)
+    # SECTION ------------ DB OPERATIONS (CRUD) -----------------  
+    # Read
+    @classmethod
+    def getAll(cls) -> list[Model]:
+        # Should be implemented in child classes
+        return list()          
+    @classmethod
+    def getById(cls, id) -> Model:
+        cls.db_load()
+        for instance in cls.getAll():
+            if instance.id == id:
+                return instance
+        return None
+    # SECTION ------------- UTILS -------------
     @classmethod
     def make_attr_json_serializable(cls, attr: Any, attr_field_type: str) -> Any:
         """Convierte un atributo de la clase en una variable serializable para JSON
@@ -243,8 +276,23 @@ class Model():
         # Si no se coincide con ningún modelo, se retorna None
         return None
     
+    def exists(self) -> bool:
+        """Verifica si esta instancia ya existe en la base de datos
+
+        Se dice que existe si es que su id está presente en la base de datos
+        Se ignora si los otros atributos coinciden o no
+        
+        Returns:
+            bool: True si ya existe
+        """
+        existing_instances = self.getAll()
+        for existing in existing_instances:
+            if existing.id == self.id:
+                return True
+        return False
+    
     def json_serializable_dict(self) -> dict:
-        """Devuelve un diccionario del evento listo para poblar la base de datos en JSON
+        """Devuelve un diccionario del modelo listo para poblar la base de datos en JSON
         
         * Utiliza el atributo "repr" (=True) de los fields del dataclass para
         decidir qué atributos son aceptados
@@ -273,3 +321,9 @@ class Model():
             if event.id > g_id:
                 g_id = event.id
         return g_id + 1
+    
+    def to_dict(self):
+        """Devuelve un diccionario con todos los atributos de la instancia del modelo
+        """
+        current_dict = asdict(self)
+        return current_dict
