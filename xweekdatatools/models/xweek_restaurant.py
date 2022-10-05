@@ -44,7 +44,7 @@ class XweekRestaurant(Model):
         return rests
     
     @classmethod
-    def getByEvent(cls, event:XweekEvent) -> list[XweekEvent]:
+    def getAllInEvent(cls, event:XweekEvent) -> list[XweekEvent]:
         rests=[]
         for rest in event.restaurants:
             # Sólo se añaden a la lista si son datos válidos
@@ -70,7 +70,7 @@ class XweekRestaurant(Model):
         super().save(cls)
 
     @classmethod
-    def reset_all(cls):
+    def reset_all_in_event(cls, event:XweekEvent):
         """Resetea toda la lista de eventos
         """
         cls.db = cls.get_current_db_state()
@@ -100,18 +100,7 @@ class XweekRestaurant(Model):
     def to_dict(self):
         return asdict(self)
 
-    def json_serializable_dict(self) -> dict:
-        """Devuelve un diccionario del evento listo para poblar la base de datos en JSON
-
-        * Utiliza el atributo "repr" (=True) de los fields del dataclass para
-        decidir qué atributos son aceptados
-        * Aquí se procesan los campos que automaticamente no dan algo coherente
-        para la base de datos
-
-        Returns:
-            dict: Diccionario listo, completo y con el formato deseado
-        """
-        return {"id": 1, "name": "A restaurant :)"}
+    
 
     def summary(self) -> str:
         """Devuelve un pequeño resumen de una instancia del restaurante
