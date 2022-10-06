@@ -3,7 +3,6 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING
 
-from xweekdatatools.utils.path_helpers import make_valid_path
 if TYPE_CHECKING:
     from xweekdatatools.controllers import Controller
     from xweekdatatools.models import XweekEvent
@@ -19,6 +18,7 @@ style = get_style({"question": "#ff3355", "questionmark": "#ff3355",
                   "answer": "#0055ff"}, style_override=False)
 
 from xweekdatatools.app_constants import AppActions
+from xweekdatatools.utils.path_helpers import make_valid_path
 
 class View:
     def __init__(self, controller: Controller = None) -> None:
@@ -184,10 +184,7 @@ class View:
         ).execute()
         
 
-    def find_docs_ui(self, current_event:XweekEvent=None):
-        if current_event is None:
-            current_event = self.select_event(XweekEvent.getAll())
-
+    def find_docs_ui(self, current_event:XweekEvent) -> list[Path]:
         print(
             "Este es el asistente para encontrar los archivos word dentro de una carpeta")
         current_event.src_path = make_valid_path(inquirer.filepath(
@@ -238,6 +235,28 @@ class View:
         return inquirer.confirm(
             message="Proceder? O Cancelar? (Y/n)"
         ).execute()
+        
+    def overwrite_folder_prompt(self, folder_children_list: list[Path]) -> bool:
+        """Ayuda a decidir si se sobreescribe la carpeta en la que están los 
+        elementos de la lista
+
+        Args:
+            folder_children_list (list[Path]): lista de paths cuyo padre decidimos
+
+        Returns:
+            Path: path donde escribir finalmente
+        """
+        if len(folder_children_list) <= 0:
+            return False
+        old_parent = folder_children_list[0].parent
+        overwrite = inquirer.confirm(
+            message="Desea sobreescribir los archivos en "  + str(old_parent.absolute()) + "?",
+        ).execute()
+        if overwrite:
+            return old_parent
+        return False
+            
+        
         
 
 if __name__ == "__main__":

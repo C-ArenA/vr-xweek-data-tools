@@ -73,7 +73,9 @@ class Controller:
         if input("Continúo? (y)") == "y":
             self.find_event_docs(new_xwe)
 
-    def find_event_docs(self, event: XweekEvent):
+    def find_event_docs(self, event: XweekEvent = None):
+        if event is None:
+            event = XweekEvent.getById(self.view.select_event(XweekEvent.getAll()))
         docs = self.view.find_docs_ui(event)
         event.docs_path_list = docs
         event.save()
@@ -91,14 +93,17 @@ class Controller:
         if event is None:
             event = XweekEvent.getById(self.view.select_event(XweekEvent.getAll()))
         if self.view.convert_docs2txt_ui(event):
-            temp_folder = "./TEMP/txts/" + datetime.datetime.now().strftime("%d%m%Y_%H%M%S") + "/"
+            overwrite = self.view.overwrite_folder_prompt(event.txts_path_list)
+            if overwrite:
+                temp_path = overwrite
+            else:
+                temp_path = Path("./TEMP/txts/" + datetime.datetime.now().strftime("%d%m%Y_%H%M%S") + "/")
             try:
-                os.makedirs(temp_folder)
-            except:
-                pass
-            docslist=[os.path.normpath(str(doc.absolute())) for doc in event.docs_path_list]
-            print(docslist)
-            event.txts_path_list = [Path(txt) for txt in docs2txt(docslist, temp_folder)]
+                temp_path.mkdir(parents=True)
+            except FileExistsError:
+                print("Sobreescribiendo txts en: " + str(temp_path.absolute))
+                
+            event.txts_path_list = docs2txt(event.docs_path_list, temp_path)
             event.save()
             
         

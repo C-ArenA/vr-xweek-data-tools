@@ -20,12 +20,21 @@ def make_valid_path(path: Union[str, Path]) -> Union[Path, None]:
     # Si ya es una instancia de Path, pues sólo se retorna el Path
     if isinstance(path, Path):
         return path
-    # Si era otra cosa, se vuelve Path y se retorna
+    # Si es un string se normaliza (A veces el string viene en forma: '"f:/vr/"')
+    # Con double quotes extra, las cuales se pueden quitar aquí
+    if isinstance(path, str):
+        if path[0] == '"':
+            path = path[1:]
+        if path[-1] == '"':
+            path = path[:-1]
+        return Path(path)
+    # Si era otra cosa, se vuelve Path y se retorna si se puede
     try:
         return Path(path)
     # En caso de no poder volverse Path se devuelve None
     except TypeError:
         return None
+    return None
     
 def json_serializable_path(path:Path):
     if isinstance(path, Path):
