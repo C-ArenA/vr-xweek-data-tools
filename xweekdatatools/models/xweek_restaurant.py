@@ -32,26 +32,38 @@ class XweekRestaurant(Model):
     
     # SECTION ------------ DB OPERATIONS (CRUD) -----------------
     # CREATE / UPDATE
-    def save(self):
+    def save(self) -> bool:
         """Guarda el restaurant (nuevo o actualizado) en la base de datos
         """
         self.load()
-        # Primero verifico que pertenezca a algún evento. De otra forma es imposible
+        # Primero verifico que pertenezca a algún evento existente. De otra forma es imposible
+        # crear o actualizar este restaurante
+        if not self.attach_to_an_event():
+            print("No existe un evento real para este restaurante, no se puede proceder")
+            return False
+        # -------------------------------------------------------------------------------------
+
         # Si el ID del evento no es válido (es None o no es int) se aborta
         if type(self.id) != int:
-            print(f'Evento no pudo ser creado por ID inválido')
-            return
-        # Se actualiza evento si ID ya existe
-        for index, event in enumerate(self.getAll()):
-            if event.id == self.id:
-                self.xweekevents[index] = self.to_end_dict()
-                super().save()
-                print(f'Evento {event.id} actualizado')
-                return
-        # Se crea evento si ID no existe
-        self.xweekevents.append(self.json_serializable_dict())
-        super().save()
-        print(f'Evento {self.id} creado')
+            print(f'Restaurante no pudo ser creado por ID inválido')
+            return False
+        # Ahora añadimos este restaurante a nuestra instancia de evento ya verificada 
+        # Si hay un id similar entre los restaurantes del evento, se actualiza el restaurante:
+        for index, rest in enumerate(self.event.restaurants):
+            if rest.id == self.id:
+                self.event.restaurants[index] = self
+                self.event.save()
+                print("Restaurant actualizado")
+                return True
+        # Sino se añade como nuevo restaurante (Tras verificar la unicidad del ID)
+        for rest in self.getAll():
+            if rest.id == self.id:
+                self.id = self.next_id()
+        self.event.restaurants.append(self)
+        self.event.save()
+        print("Restaurant creado")
+        return True
+        
     def to_dict(self):
         return asdict(self)
     # READ
@@ -83,6 +95,10 @@ class XweekRestaurant(Model):
     # DELETE
     def remove(self) -> bool:
         self.db_load()
+        if not self.attach_to_an_event():
+            print("No existe un evento real para este restaurante. No se puede proceder")
+            return False
+        
         db_events = self.db[XweekEvent.MODEL_NAME_IN_JSON]
         for db_event in db_events:
             db_restaurants:list = db_event[XweekRestaurant.MODEL_NAME_IN_JSON]
@@ -112,7 +128,7 @@ class XweekRestaurant(Model):
 
     
 
-    # SECTION ------------ DATA OPERATIONS -----------------
+    # SECTION ------------ DATA OPERATIONS AND TOOLS-----------------
 
     def summary(self) -> str:
         """Devuelve un pequeño resumen de una instancia del restaurante
@@ -121,3 +137,26 @@ class XweekRestaurant(Model):
             str: Resumen de la instancia del restaurante
         """
         return f'{self.id}: {self.name} -> {self.post_url} Evento: '
+    
+    def attach_to_an_event(self) -> bool:
+        """Verifica que el restaurant pertenezca a algún evento existente. De otra forma es imposible
+        realizar ciertas operaciones, ya que todo restaurante depende de algún evento
+
+        Returns:
+            bool: Indica si el restaurante fue conectado exitosamente a un evento existente
+        """
+        
+        # Si el id del evento existe se actualiza el evento con ese id
+        if self.event_id is not None:
+            self.event = XweekEvent.getById("event_id")
+            return True
+        # Si no hay id pero hay evento, se actualiza el mismo evento con los datos más recientes y el id
+        elif self.event is not None:
+            self.event: XweekEvent = XweekEvent.getById(self.event.id)
+            self.event_id = self.event.id
+            return True
+        # Si después de lo anterior no hay evento existente salimos con Falso
+        if self.event is None:
+            return False
+        # Pero si el evento sí existe, salimos con True
+        return True
