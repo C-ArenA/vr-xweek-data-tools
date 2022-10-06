@@ -1,6 +1,8 @@
 # For TYPE CHECKING ------------------
 from __future__ import annotations
+import os
 from typing import TYPE_CHECKING
+from tools.converters.docs2txt import docs2txt
 
 if TYPE_CHECKING:
     from xweekdatatools.views import View
@@ -46,6 +48,7 @@ class Controller:
         # Here we manually define the bindings: action-functionality
         actions[AppActions.CREATE_NEW_EVENT] = self.create_new_event
         actions[AppActions.FIND_EVENT_DOCS] = self.find_event_docs
+        actions[AppActions.CONVERT_DOCS2TXT] = self.convert_docs2txt
         # Once the functionality is available we execute it
         if type(action) is AppActions:
             self.chosen_action = action
@@ -71,7 +74,25 @@ class Controller:
     def find_event_docs(self, event: XweekEvent):
         docs = self.view.find_docs_ui(event)
         event.docs_path_list = docs
+        event.save()
+        if self.chosen_action == AppActions.COMPLETE_PROCESS:
+            # Do the next thing
+            print("Continúo porque sí")
+            self.convert_docs2txt(event)
+            return
+        if input("Continúo? (y)") == "y":
+            self.convert_docs2txt(event)
     
         
+    def convert_docs2txt(self, event:XweekEvent=None):
+        
+        if event is None:
+            event = XweekEvent.getById(self.view.select_event(XweekEvent.getAll()))
+        if self.view.convert_docs2txt_ui(event):
+            try:
+                os.makedirs("./TEMP/txts/")
+            except:
+                pass
+            docs2txt([os.path.normpath(str(doc.absolute)) for doc in event.docs_path_list], "./TEMP/txts")
         
         

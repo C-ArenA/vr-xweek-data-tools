@@ -230,6 +230,15 @@ class View:
             print(str(doc))
         return accepted_docs
 
+    def convert_docs2txt_ui(self, event: XweekEvent)-> bool:
+        self.init_ui()
+        print("Ahora se procede a convertir los siguientes docs en txts:")
+        for doc in event.docs_path_list:
+            print(str(doc.absolute()))
+        return inquirer.confirm(
+            message="Proceder? O Cancelar? (Y/n)"
+        ).execute()
+        
 
 if __name__ == "__main__":
     view = View()
