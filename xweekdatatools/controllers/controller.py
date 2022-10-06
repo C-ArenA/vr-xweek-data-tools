@@ -1,6 +1,8 @@
 # For TYPE CHECKING ------------------
 from __future__ import annotations
+import datetime
 import os
+from pathlib import Path
 from typing import TYPE_CHECKING
 from tools.converters.docs2txt import docs2txt
 
@@ -89,10 +91,15 @@ class Controller:
         if event is None:
             event = XweekEvent.getById(self.view.select_event(XweekEvent.getAll()))
         if self.view.convert_docs2txt_ui(event):
+            temp_folder = "./TEMP/txts/" + datetime.datetime.now().strftime("%d%m%Y_%H%M%S") + "/"
             try:
-                os.makedirs("./TEMP/txts/")
+                os.makedirs(temp_folder)
             except:
                 pass
-            docs2txt([os.path.normpath(str(doc.absolute)) for doc in event.docs_path_list], "./TEMP/txts")
+            docslist=[os.path.normpath(str(doc.absolute())) for doc in event.docs_path_list]
+            print(docslist)
+            event.txts_path_list = [Path(txt) for txt in docs2txt(docslist, temp_folder)]
+            event.save()
+            
         
         

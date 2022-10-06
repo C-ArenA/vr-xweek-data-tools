@@ -37,8 +37,8 @@ def general_nomalization(file_path):
         text = unicodedata.normalize('NFKD', text) # Normalizamos el tipo de texto
         text = text.strip() # Quitamos espacios y saltos de línea al principio y final
         # Remplazamos texto por emoji en los casos dados
-        print("----------------------------------------------------------")
-        print(text)
+        # print("----------------------------------------------------------")
+        # print(text)
         text = re.sub(r' *🍺 ?🥤 *Bebidas *:', '🍺', text) 
         text = re.sub(r' *Maridaje *sugerido *:', '🥤', text)
         text = re.sub(r' *MARIDAJE *SUGERIDO *:', '🥤', text)
@@ -46,7 +46,7 @@ def general_nomalization(file_path):
         text = re.sub(r' *🍟 *A.*o *:', '🍟', text)
         text = re.sub(r'🍟 Acompañamiento:', '🍟', text) 
         text = text.replace("🍟 Acompañamiento:", "🍟")
-        print(text)
+        # print(text)
         # Creamos excedente de saltos de línea antes de los emojis para que luego no se pierdan al quitar saltos de línea excedentes
         for emoji in emojis:
             text = re.sub(rf'^ *{emoji}', f'\n{emoji}', text, flags=re.M)
