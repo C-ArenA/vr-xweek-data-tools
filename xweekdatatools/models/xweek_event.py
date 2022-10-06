@@ -6,6 +6,7 @@ from pathlib import Path
 from xweekdatatools.models.xweek_restaurant import XweekRestaurant
 from xweekdatatools.models import Model
 from xweekdatatools.utils import make_valid_path, json_serializable_path
+from xweekdatatools.utils.data_helpers import cardinal_to_ordinal
 
 @dataclass
 class XweekEvent(Model):
@@ -75,7 +76,7 @@ class XweekEvent(Model):
         * Es nuevo si su id no existe ya en los otros eventos
         * Es actualizado si su id consiste con alguno
         """
-        self.load()
+        self.db_load()
         # Si el ID del evento no es válido (es None o no es int) se aborta
         if type(self.id) != int:
             print(f'Evento no pudo ser creado por ID inválido')
@@ -94,7 +95,8 @@ class XweekEvent(Model):
 
     # SECTION ------------ DATA OPERATIONS -----------------
     
-    
+    def get_version(self):
+        return self.location_abbreviation + "-" + cardinal_to_ordinal(self.version)
         
     def summary(self) -> str:
         """Devuelve un pequeño resumen de una instancia del evento

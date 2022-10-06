@@ -32,7 +32,7 @@ class Model():
     created: str = datetime.datetime.now().strftime("%d-%m-%y_%H-%M-%S")
     modified: str = datetime.datetime.now().strftime("%d-%m-%y_%H-%M-%S")
     # In case we need a View for our instance:
-    view: View = field(default=None, init=False, repr=False)
+    view: View = field(default=None, repr=False)
 
     def __post_init__(self):
         self.db_load()
@@ -89,6 +89,8 @@ class Model():
         Returns:
             dict: Se retorna "db"
         """
+        if input("Está a punto de guardar algo en la base de datos Cancelar:'c':") == "c":# TODO: Borrar esta línea de ayuda
+            sys.exit("Saliendo para no dañar la base de datos")
         with open(cls.db_file_path, "w", encoding="utf-8") as db_file:
             json.dump(cls.db, db_file, ensure_ascii=False, indent=4)
     # SECTION ------------ DB OPERATIONS (CRUD) -----------------  
@@ -203,6 +205,7 @@ class Model():
         Returns:
             Any: Representación serializable del atributo ingresado a la función
         """
+        from xweekdatatools.views import View
         # ----- Any type
         if attr_field_type == "Any" or attr_field_type == "any" or attr_field_type == "":
             return attr
@@ -241,6 +244,11 @@ class Model():
                         list_attr.append(item_converted)
                     
             return list_attr
+        # ------- View
+        if attr_field_type == "View":
+            if isinstance(attr, View):
+                return attr
+            return None
         # Si no tenemos el tipo de dato validado aún, devolvemos un None
         return None
     
@@ -263,12 +271,12 @@ class Model():
         # Puede que no se nos pase un dict, puede ser un int, str, bool, en
         # cuyo caso no se procede y se devuelve None
         try:
-            dict_keys = dict.keys()
+            dict_keys = list(dict.keys())
         except:
             return None
         # Con todos los hijos se verifican los keys
         for child in child_classes:
-            my_keys = child().json_serializable_dict().keys()
+            my_keys = child.to_json_keys()
             # Si el diccionario tiene las mismas llaves que el json_serializable del modelo
             # se asume que, al menos, es posible crearse una instancia con este dict
             if my_keys == dict_keys:
@@ -330,3 +338,21 @@ class Model():
     
     def summary(self):
         print("Modelo sin summary: " + self.id)
+    
+    @classmethod
+    def to_json_fields(cls) -> list[Field]:
+        """Devuelve los fields de los campos que van a la base de datos
+
+        Returns:
+            list[Field]: lista de fields de los campos del modelo que van al json
+        """
+        all_fields = fields(cls)
+        return [raw_field for raw_field in all_fields if raw_field.repr==True]
+    @classmethod
+    def to_json_keys(cls) -> list[str]:
+        """Devuelve las keys que el modelo lleva a la base de datos en json
+
+        Returns:
+            list[str]: lista de keys
+        """
+        return [json_field.name for json_field in cls.to_json_fields()]

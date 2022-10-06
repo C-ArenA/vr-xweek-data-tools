@@ -1,6 +1,9 @@
 # For TYPE CHECKING ------------------
 from __future__ import annotations
+import datetime
 from typing import TYPE_CHECKING
+
+from xweekdatatools.utils.path_helpers import make_valid_path
 if TYPE_CHECKING:
     from xweekdatatools.controllers import Controller
     from xweekdatatools.models import XweekEvent
@@ -18,7 +21,7 @@ style = get_style({"question": "#ff3355", "questionmark": "#ff3355",
 from xweekdatatools.app_constants import AppActions
 
 class View:
-    def __init__(self, controller: Controller) -> None:
+    def __init__(self, controller: Controller = None) -> None:
         self.controller = controller
 
     def init_ui(self):
@@ -101,41 +104,57 @@ class View:
                 default["name"]: None for default in xweekconfig["event_defaults"]},
             multicolumn_complete=True).execute()
         # --- 2. Lugar del Evento
-        xweekevent["event_location"] = inquirer.text(
+        xweekevent["location"] = inquirer.text(
             message="Lugar del evento:",
-            default=xweeklastevent["event_location"],
+            default=xweeklastevent["location"],
             completer={
-                location: None for location in xweekconfig["event_locations"]},
+                location["name"]: None for location in xweekconfig["event_default_locations"]},
             multicolumn_complete=True).execute()
         # --- 3. Abreviación del lugar del Evento
         try:
-            default_loc_abb = xweekconfig["event_locations_abbreviations"][xweekconfig["event_locations"].index(
-                xweekevent["event_location"])]
+            default_loc_abb = ""
+            for def_loc in xweekconfig["event_default_locations"]:
+                if def_loc["name"] == xweekevent["location"]:
+                    default_loc_abb = def_loc["abbreviation"]
         except:
             default_loc_abb = ""
-        xweekevent["event_location_abbreviation"] = inquirer.text(
+        xweekevent["location_abbreviation"] = inquirer.text(
             message="Forma abreviada del lugar del evento:",
             default=default_loc_abb,
             completer={
-                location_abb: None for location_abb in xweekconfig["event_locations_abbreviations"]},
+                location["abbreviation"]: None for location in xweekconfig["event_default_locations"]},
             multicolumn_complete=True).execute()
         # --- 4. Versión del Evento
-        xweekevent["event_version"] = inquirer.number(
+        xweekevent["version"] = inquirer.number(
             message="Versión del evento (Número)",
             validate=validator.EmptyInputValidator()
         ).execute()
         # --- 5. Dominio del Evento
         try:
-            default_domain = xweekconfig["event_domains"][xweekconfig["event_names"].index(
-                xweekevent["event_name"])]
+            default_domain = xweeklastevent["domain"]
+            for event_def in xweekconfig["event_defaults"]:
+                if event_def["name"] == xweekevent["name"]:
+                    default_domain = event_def["domain"]
         except:
-            default_domain = xweeklastevent["event_domain"]
-        xweekevent["event_domain"] = inquirer.text(
+            default_domain = xweeklastevent["domain"]
+        xweekevent["domain"] = inquirer.text(
             message="Dominio Web del evento:",
             default=default_domain,
-            completer={dom: None for dom in xweekconfig["event_domains"]},
+            completer={ev_def["domain"]: None for ev_def in xweekconfig["event_defaults"]},
             multicolumn_complete=True
         ).execute()
+        
+        # --- 5. URL de medios
+        
+        default_domain = xweekevent["domain"] + "/wp-content/uploads/" + datetime.datetime.now().strftime("%Y/%m")
+        xweekevent["media_url"] = inquirer.text(
+            message="URL de medios (Imágenes):",
+            default=default_domain,
+            completer={ev_def["domain"] + "/wp-content/uploads/" + datetime.datetime.now().strftime("%Y/%m"): None for ev_def in xweekconfig["event_defaults"]},
+            multicolumn_complete=True
+        ).execute()
+        print(xweekevent)
+        return xweekevent
 
     def no_model(self, db_path: Path):
         self.init_ui()
@@ -165,27 +184,27 @@ class View:
         ).execute()
         
 
-    def find_docs_ui(self, current_event=None):
+    def find_docs_ui(self, current_event:XweekEvent=None):
         if current_event is None:
-            current_event = self.select_event()
+            current_event = self.select_event(XweekEvent.getAll())
 
         print(
             "Este es el asistente para encontrar los archivos word dentro de una carpeta")
-        src_path = inquirer.filepath(
+        current_event.src_path = make_valid_path(inquirer.filepath(
             message="Dentro de qué carpeta desea buscar los archivos de word (Puede arrastrar y soltar):",
             only_directories=True
-        ).execute()
-        found_docs = current_event.src_path.rglob("*.doc*")
+        ).execute())
+        found_docs:list[Path] = list(current_event.src_path.rglob("*.doc*"))
         accepted_docs = []
         print(
-            f'Se encontraron {len(found_docs)} documentos de word dentro de la carpeta {src_path}\n')
+            f'Se encontraron {len(found_docs)} documentos de word dentro de la carpeta {current_event.src_path}\n')
         if len(found_docs) > 0:
             print(
                 f'A continuación deseleccione los documentos que están por demás (con tecla espacio), deje seleccionados los demás\n')
 
             accepted_docs = inquirer.checkbox(
                 message="Deseleccione docs innecesarios:",
-                choices=[Choice(doc, name=doc["file"], enabled=True)
+                choices=[Choice(doc, name=str(doc), enabled=True)
                          for doc in found_docs]
             ).execute()
 
@@ -193,18 +212,13 @@ class View:
             message="Desea ingresar doc extra manualmente?"
         ).execute()
         while extradoc:
-            new_file = inquirer.filepath(
+            new_file = make_valid_path(inquirer.filepath(
                 message="Ingrese doc extra manualmente (Puede arrastrar):",
                 only_files=True,
-            ).execute()
+            ).execute())
             file_name, file_ext = os.path.splitext(new_file)
-            if file_ext[:4] == ".doc":
-                accepted_docs.append({
-                    "path": new_file,
-                    "file": os.path.basename(new_file),
-                    "name": file_name,
-                    "ext": file_ext
-                })
+            if new_file.suffix[:4] == ".doc":
+                accepted_docs.append(new_file)
             else:
                 print(
                     "El archivo no es de tipo documento de word, no se acepta\n")
@@ -213,7 +227,7 @@ class View:
             ).execute()
         print("Los documentos encontrados finales son:\n")
         for doc in accepted_docs:
-            print(doc["path"])
+            print(str(doc))
         return accepted_docs
 
 

@@ -14,3 +14,7 @@ wt.exe -d . -p "cmd"
 No se le puede pasar un evento completo a Restaurant, porque en verdad es el Restaurant
 el que debe de hacerse de un objeto con un id. El evento no pueede modificarse 
 desded Restaurant, a excepción del atributyo restaurants
+
+Tuve el problema de que estaban muy acopladas mis clases y se hacía un loop infinito
+APRENDÍ : Si Event está por encima de Restaurant, mejor dejo que se controle a Restaurant
+desde Event y no a Event desde Restaurant

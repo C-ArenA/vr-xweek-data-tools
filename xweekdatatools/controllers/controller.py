@@ -45,6 +45,7 @@ class Controller:
         }
         # Here we manually define the bindings: action-functionality
         actions[AppActions.CREATE_NEW_EVENT] = self.create_new_event
+        actions[AppActions.FIND_EVENT_DOCS] = self.find_event_docs
         # Once the functionality is available we execute it
         if type(action) is AppActions:
             self.chosen_action = action
@@ -55,18 +56,22 @@ class Controller:
     # ------------------------- APP ACTIONS -------------------------
     def create_new_event(self):
         
-        self.view.insert_event_data(
-            self.model.xweekconfig, self.model.last_event)
-
+        new_xwe_dict = self.view.insert_event_data(
+            self.model.db["xweekconfig"], XweekEvent.getAll()[-1].json_serializable_dict())
+        new_xwe = XweekEvent(**new_xwe_dict)
+        new_xwe.save()
         if self.chosen_action == AppActions.COMPLETE_PROCESS:
             # Do the next thing
-            pass
+            print("Continúo porque sí")
+            self.find_event_docs(new_xwe)
+            return
+        if input("Continúo? (y)") == "y":
+            self.find_event_docs(new_xwe)
 
-    def find_event_docs(self):
-        print("Encontrando documentos en el último evento trabajado\n")
-        current_event = XweekEvent.getAll()[-1]
-        print("Dentro de la carpeta ", current_event.src_path.absolute())
-        current_event.docs_path_list = current_event.src_path.rglob("*.doc*")
-        current_event.save()
+    def find_event_docs(self, event: XweekEvent):
+        docs = self.view.find_docs_ui(event)
+        event.docs_path_list = docs
+    
+        
         
         
