@@ -81,15 +81,25 @@ class XweekRestaurant(Model):
     
 
     # DELETE
+    def remove(self) -> bool:
+        self.db_load()
+        db_events = self.db[XweekEvent.MODEL_NAME_IN_JSON]
+        for db_event in db_events:
+            db_restaurants:list = db_event[XweekRestaurant.MODEL_NAME_IN_JSON]
+            for index, db_restaurant in enumerate(db_restaurants):
+                if self.id == db_restaurant["id"]:
+                    db_restaurants.pop(index)
+                    return True
+        return False
     @classmethod
     def removeById(cls, id):
-        cls.db = cls.get_current_db_state()
+        cls.db_load()
         index_to_remove = None
-        for i, event in enumerate(cls.db["xweekevents"]):
-            if event["id"] == id:
-                index_to_remove = i
-        cls.db["xweekevents"].pop(index_to_remove)
-        super().save(cls)
+        for index, instance in enumerate(cls.getAll()):
+            if instance.id == id:
+                print("Eliminar: " + instance.summary())
+                
+        cls.db_save()
 
     @classmethod
     def reset_all_in_event(cls, event:XweekEvent):

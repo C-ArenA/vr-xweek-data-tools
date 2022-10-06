@@ -327,3 +327,6 @@ class Model():
         """
         current_dict = asdict(self)
         return current_dict
+    
+    def summary(self):
+        print("Modelo sin summary: " + self.id)

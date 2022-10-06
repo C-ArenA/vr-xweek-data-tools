@@ -1,26 +1,36 @@
 import sys
 import json
 from pathlib import Path
+from pprint import pprint
+
+def get_db_dict_from_json_file_path(json_file_path: Path) -> dict:
+    try:
+        with json_file_path.open("r", encoding="utf-8") as db_file:
+            return json.load(db_file)
+    except:
+        sys.exit("No se pueded abrir la base de datos JSON: " +
+                 str(json_file_path))
 
 
-def get_db_dict_from_json_file_path(json_file_path:Path) -> dict:
-	try:
-		with json_file_path.open("r", encoding="utf-8") as db_file:
-			return json.load(db_file)
-	except:
-		sys.exit("No se pueded abrir la base de datos JSON: " + str(json_file_path))
-  
+db = get_db_dict_from_json_file_path(
+    Path("F:\\VReality\\XWeekTools\\xweekdatatools\\db.json"))
+
+
+def event_generator(db):
+    for i, v in enumerate(db["xweekevents"]):
+        yield i, v
+
+
 def xweek_generator(db: dict, json_key: str):
     yield_dict = {
-        # ïndice - valor de lo conseguido a lo largo de las iteraciones
         "db_xweekevent_index": None,
         "db_xweekevent": None,
         "db_restaurant_index": None,
         "db_restaurant": None,
         "db_dish_index": None,
         "db_dish": None,
-        "db_index": None, # Índice de lo conseguido de acuerdo al json_key (evento,restaurante,dish)
-        "db_value": None # valor de lo conseguido de acuerdo al json_key (evento,restaurante,dish)
+        "db_index": None,
+        "db_value": None
     }
     try:
         if isinstance(db["xweekevents"], list):
@@ -47,4 +57,15 @@ def xweek_generator(db: dict, json_key: str):
                                     yield yield_dict
     except:
         pass                                
-      
+                            
+    
+
+
+
+print("\n")
+pprint(db["xweekevents"])
+for v in xweek_generator(db, "restaurants"):
+    v["db_xweekevent"]["restaurants"][v["db_restaurant_index"]] = 7
+
+print("\n")
+pprint(db["xweekevents"])

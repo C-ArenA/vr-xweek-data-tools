@@ -173,7 +173,7 @@
             "long_description": "Disfruta de este evento",
             "short_description": "Disfruta",
             "calendar": "Del x al y del z",
-            "restaurants": [],
+            "restaurants": [1,2],
             "dst_path": null,
             "docs_path_list": [],
             "txts_path_list": []
