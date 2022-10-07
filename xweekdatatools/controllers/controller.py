@@ -53,10 +53,15 @@ class Controller:
         actions[AppActions.UPDATE_EVENT_DATA] = self.update_event
         actions[AppActions.FIND_EVENT_DOCS] = self.find_event_docs
         actions[AppActions.UPDATE_EVENT_DOCS_LIST] = self.find_event_docs
-        actions[AppActions.FIND_EVENT_IMAGES] = self.view.pending_functionality
-        actions[AppActions.COLLECT_EVENT_IMAGES] = self.view.pending_functionality
+        actions[AppActions.FIND_EVENT_IMAGES] = self.find_event_images
+        actions[AppActions.COLLECT_EVENT_IMAGES] = self.collect_event_images
         actions[AppActions.CONVERT_DOCS2TXT] = self.convert_docs2txt
         actions[AppActions.NORMALIZE_TXT] = self.normalize_txt
+        actions[AppActions.CONVERT_TXT2DATA] = self.convert_txt2data
+        actions[AppActions.GEN_EVENT_JSON] = self.gen_event_json
+        actions[AppActions.GEN_EVENT_CSV] = self.gen_event_csv
+        actions[AppActions.GEN_EVENT_XLSX] = self.gen_event_xlsx
+        actions[AppActions.GEN_EVENT_QRS] = self.gen_event_qrs
         actions[AppActions.EXIT] = self.exit
         # Once the functionality is available we execute it
         if type(action) is AppActions:
@@ -65,10 +70,9 @@ class Controller:
         else:
             self.view.pending_functionality()
 
-
     # ------------------------- APP ACTIONS -------------------------
 
-    def create_new_event(self, dumb_event = None):
+    def create_new_event(self, dumb_event=None):
 
         new_xwe_dict = self.view.insert_event_data(
             self.model.db["xweekconfig"], XweekEvent.getAll()[-1].json_serializable_dict())
@@ -118,9 +122,8 @@ class Controller:
             event.save()
         self.view.go_to_next_action_prompt(AppActions.NORMALIZE_TXT, event)
 
-    def normalize_txt(self,event:XweekEvent=None):
-        import os
-        #os.environ["EDITOR"] = "code"
+    def normalize_txt(self, event: XweekEvent = None):
+
         if event is None:
             event = XweekEvent.getById(
                 self.view.select_event(XweekEvent.getAll()))
@@ -128,14 +131,54 @@ class Controller:
             if txt.exists:
                 pass
             else:
-                raise("No existe el archivo al que se apunta en la base de datos")
+                raise ("No existe el archivo al que se apunta en la base de datos")
         normalized = self.view.normalize_txts(event)
         if normalized:
-            self.view.go_to_next_action_prompt(AppActions.CONVERT_TXT2DATA, event)
+            self.view.go_to_next_action_prompt(
+                AppActions.CONVERT_TXT2DATA, event)
             return
         self.view.select_main_action(None, "No habían txts para normalizar")
-        
-        
+
+    def convert_txt2data(self, event: XweekEvent = None):
+        if event is None:
+            event = XweekEvent.getById(
+                self.view.select_event(XweekEvent.getAll()))
+        self.view.pending_functionality()
+
+    def gen_event_json(self, event: XweekEvent = None):
+        if event is None:
+            event = XweekEvent.getById(
+                self.view.select_event(XweekEvent.getAll()))
+        self.view.pending_functionality()
+
+    def gen_event_csv(self, event: XweekEvent = None):
+        if event is None:
+            event = XweekEvent.getById(
+                self.view.select_event(XweekEvent.getAll()))
+        self.view.pending_functionality()
+
+    def gen_event_xlsx(self, event: XweekEvent = None):
+        if event is None:
+            event = XweekEvent.getById(
+                self.view.select_event(XweekEvent.getAll()))
+        self.view.pending_functionality()
+
+    def gen_event_qrs(self, event: XweekEvent = None):
+        if event is None:
+            event = XweekEvent.getById(
+                self.view.select_event(XweekEvent.getAll()))
+        self.view.pending_functionality()
+    def find_event_images(self, event: XweekEvent = None):
+        if event is None:
+            event = XweekEvent.getById(
+                self.view.select_event(XweekEvent.getAll()))
+        self.view.pending_functionality()
+    def collect_event_images(self, event: XweekEvent = None):
+        if event is None:
+            event = XweekEvent.getById(
+                self.view.select_event(XweekEvent.getAll()))
+        self.view.pending_functionality()
+
     def exit(self, dumb=None):
         import sys
 
