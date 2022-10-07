@@ -35,7 +35,7 @@ class Controller:
     def start_app(self):
         self.view.select_main_action()
 
-    def choose_action(self, action: AppActions):
+    def choose_action(self, action: AppActions, event):
         """#Router of the application.
         It gets an action from the view and transforms it to some functionality
         or shows a pending_functionality message if no functionality is available yet
@@ -57,26 +57,20 @@ class Controller:
         # Once the functionality is available we execute it
         if type(action) is AppActions:
             self.current_action = action
-            actions[action]()
+            actions[action](event)
         else:
             self.view.pending_functionality()
 
 
     # ------------------------- APP ACTIONS -------------------------
 
-    def create_new_event(self):
+    def create_new_event(self, dumb_event = None):
 
         new_xwe_dict = self.view.insert_event_data(
             self.model.db["xweekconfig"], XweekEvent.getAll()[-1].json_serializable_dict())
         new_xwe = XweekEvent(**new_xwe_dict)
         new_xwe.save()
-        if self.chosen_action == AppActions.COMPLETE_PROCESS:
-            # Do the next thing
-            print("Continúo porque sí")
-            self.find_event_docs(new_xwe)
-            return
-        if input("Continúo? (y)") == "y":
-            self.find_event_docs(new_xwe)
+        self.view.go_to_next_action_prompt(AppActions.FIND_EVENT_DOCS, new_xwe)
 
     def update_event(self, event: XweekEvent = None):
         if event is None:
@@ -88,7 +82,7 @@ class Controller:
         new_xwe = XweekEvent(**new_xwe_dict)
         self.view.show_event_data(new_xwe.json_serializable_dict())
         new_xwe.save()
-        self.view.go_to_next_action_prompt(AppActions.FIND_EVENT_DOCS)
+        self.view.go_to_next_action_prompt(AppActions.FIND_EVENT_DOCS, new_xwe)
 
     def find_event_docs(self, event: XweekEvent = None):
         if event is None:
@@ -97,13 +91,7 @@ class Controller:
         docs = self.view.find_docs_ui(event)
         event.docs_path_list = docs
         event.save()
-        if self.chosen_action == AppActions.COMPLETE_PROCESS:
-            # Do the next thing
-            print("Continúo porque sí")
-            self.convert_docs2txt(event)
-            return
-        if input("Continúo? (y)") == "y":
-            self.convert_docs2txt(event)
+        self.view.go_to_next_action_prompt(AppActions.CONVERT_DOCS2TXT, event)
 
     def convert_docs2txt(self, event: XweekEvent = None):
 
@@ -124,8 +112,9 @@ class Controller:
 
             event.txts_path_list = docs2txt(event.docs_path_list, temp_path)
             event.save()
+        self.view.go_to_next_action_prompt(AppActions.NORMALIZE_TXT, event)
 
-    def exit(self):
+    def exit(self, dumb=None):
         import sys
 
         sys.exit("Programa finalizado")

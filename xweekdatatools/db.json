@@ -566,6 +566,26 @@
                 "F:\\VReality\\XWeekTools\\TEMP\\txts\\06102022_165107\\8. Brios.txt",
                 "F:\\VReality\\XWeekTools\\TEMP\\txts\\06102022_165107\\9. Buffalo.txt"
             ]
+        },
+        {
+            "id": 15,
+            "created": "07-10-22_01-12-47",
+            "modified": "07-10-22_01-12-47",
+            "name": "Burger Week",
+            "location": "Santa Cruz",
+            "version": 3,
+            "domain": "http://burgerweekbolivia.com",
+            "src_path": "F:\\VReality\\BurgerWeek\\BW_SC_6ta\\Dramáticas",
+            "name_abbreviation": "",
+            "location_abbreviation": "sc",
+            "media_url": "http://burgerweekbolivia.com/wp-content/uploads/2022/10",
+            "long_description": "Disfruta de este evento",
+            "short_description": "Disfruta",
+            "calendar": "Del x al y del z",
+            "restaurants": [],
+            "dst_path": null,
+            "docs_path_list": [],
+            "txts_path_list": []
         }
     ]
 }

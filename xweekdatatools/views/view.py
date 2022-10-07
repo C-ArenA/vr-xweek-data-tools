@@ -54,7 +54,7 @@ class View:
             default=AppActions.CREATE_NEW_EVENT,
             style=style
         ).execute()
-        self.controller.choose_action(action)
+        self.controller.choose_action(action, None)
 
     def pending_functionality(self):
         print("No podemos hacer eso aún :(")
@@ -231,7 +231,7 @@ class View:
             return old_parent
         return False
 
-    def go_to_next_action_prompt(self, next_action: AppActions):
+    def go_to_next_action_prompt(self, next_action: AppActions, event: XweekEvent = None):
         print(chalk.red("-------------------------------"))
         action = inquirer.select(
             message="Elija una acción para continuar:",
@@ -241,7 +241,7 @@ class View:
                 Choice(AppActions.EXIT, "Salir")
             ]
         ).execute()
-        self.controller.choose_action(action)
+        self.controller.choose_action(action, event)
 
 
 if __name__ == "__main__":
