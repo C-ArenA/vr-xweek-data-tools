@@ -23,7 +23,7 @@ class Controller:
     def __init__(self, view: View = None, model: Model = None) -> None:
         self.view = view
         self.model = model
-        self.chosen_action = None
+        self.current_action = None
         self.current_event_id = None
 
     def set_view(self, view):
@@ -48,19 +48,24 @@ class Controller:
             appAction: self.view.pending_functionality for appAction in AppActions
         }
         # Here we manually define the bindings: action-functionality
+        actions[AppActions.SELECT_ACTION] = self.view.select_main_action
         actions[AppActions.CREATE_NEW_EVENT] = self.create_new_event
+        actions[AppActions.UPDATE_EVENT_DATA] = self.update_event
         actions[AppActions.FIND_EVENT_DOCS] = self.find_event_docs
         actions[AppActions.CONVERT_DOCS2TXT] = self.convert_docs2txt
+        actions[AppActions.EXIT] = self.exit
         # Once the functionality is available we execute it
         if type(action) is AppActions:
-            self.chosen_action = action
+            self.current_action = action
             actions[action]()
         else:
             self.view.pending_functionality()
 
+
     # ------------------------- APP ACTIONS -------------------------
+
     def create_new_event(self):
-        
+
         new_xwe_dict = self.view.insert_event_data(
             self.model.db["xweekconfig"], XweekEvent.getAll()[-1].json_serializable_dict())
         new_xwe = XweekEvent(**new_xwe_dict)
@@ -73,9 +78,22 @@ class Controller:
         if input("Continúo? (y)") == "y":
             self.find_event_docs(new_xwe)
 
+    def update_event(self, event: XweekEvent = None):
+        if event is None:
+            event = XweekEvent.getById(
+                self.view.select_event(XweekEvent.getAll()))
+        new_xwe_dict = self.view.insert_event_data(
+            self.model.db["xweekconfig"], event.json_serializable_dict())
+        new_xwe_dict["id"] = event.id
+        new_xwe = XweekEvent(**new_xwe_dict)
+        self.view.show_event_data(new_xwe.json_serializable_dict())
+        new_xwe.save()
+        self.view.go_to_next_action_prompt(AppActions.FIND_EVENT_DOCS)
+
     def find_event_docs(self, event: XweekEvent = None):
         if event is None:
-            event = XweekEvent.getById(self.view.select_event(XweekEvent.getAll()))
+            event = XweekEvent.getById(
+                self.view.select_event(XweekEvent.getAll()))
         docs = self.view.find_docs_ui(event)
         event.docs_path_list = docs
         event.save()
@@ -86,25 +104,28 @@ class Controller:
             return
         if input("Continúo? (y)") == "y":
             self.convert_docs2txt(event)
-    
-        
-    def convert_docs2txt(self, event:XweekEvent=None):
-        
+
+    def convert_docs2txt(self, event: XweekEvent = None):
+
         if event is None:
-            event = XweekEvent.getById(self.view.select_event(XweekEvent.getAll()))
+            event = XweekEvent.getById(
+                self.view.select_event(XweekEvent.getAll()))
         if self.view.convert_docs2txt_ui(event):
             overwrite = self.view.overwrite_folder_prompt(event.txts_path_list)
             if overwrite:
                 temp_path = overwrite
             else:
-                temp_path = Path("./TEMP/txts/" + datetime.datetime.now().strftime("%d%m%Y_%H%M%S") + "/")
+                temp_path = Path(
+                    "./TEMP/txts/" + datetime.datetime.now().strftime("%d%m%Y_%H%M%S") + "/")
             try:
                 temp_path.mkdir(parents=True)
             except FileExistsError:
                 print("Sobreescribiendo txts en: " + str(temp_path.absolute))
-                
+
             event.txts_path_list = docs2txt(event.docs_path_list, temp_path)
             event.save()
-            
-        
-        
+
+    def exit(self):
+        import sys
+
+        sys.exit("Programa finalizado")
