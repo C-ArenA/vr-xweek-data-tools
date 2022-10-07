@@ -1,19 +1,23 @@
 # For TYPE CHECKING ------------------
 from __future__ import annotations
-import datetime
-import os
-from pathlib import Path
 from typing import TYPE_CHECKING
-from tools.converters.docs2txt import docs2txt
 
+from xweekdatatools.models.xweek_restaurant import XweekRestaurant
 if TYPE_CHECKING:
     from xweekdatatools.views import View
     from xweekdatatools.models import Model
 # ------------------------------------
 
 # ----------- IMPORTS ---------------
+# ---------- PYTHON IMPORTS
+import datetime
+from pathlib import Path
+# ---------- THIRD PARTY IMPORTS
+
+# ---------- LOCAL IMPORTS
 from xweekdatatools.app_constants import AppActions
 from xweekdatatools.models.xweek_event import XweekEvent
+from xweekdatatools.utils import docs2txt
 
 
 class Controller:
@@ -143,13 +147,42 @@ class Controller:
         if event is None:
             event = XweekEvent.getById(
                 self.view.select_event(XweekEvent.getAll()))
-        self.view.pending_functionality()
+        # Vacío el evento de restaurantes
+        self.view.write_confirmation()
+        event.restaurants = []
+        event.save()
+        for txt in event.txts_path_list:
+            with txt.open('r', encoding='utf-8') as f:
+                new_rest = XweekRestaurant.from_text(event, f.read())
+                try:
+                    new_rest.order = txt.stem.split(".")[0]
+                except:
+                    new_rest.order = None                    
+                event.restaurants.append(new_rest)
+                event.save()
+        # self.view.show_rest_data(rest, event)
+        # input("txt2data: Continuar?")
+        self.view.go_to_next_action_prompt(AppActions.GEN_EVENT_JSON, event)
 
     def gen_event_json(self, event: XweekEvent = None):
+        import json
         if event is None:
             event = XweekEvent.getById(
                 self.view.select_event(XweekEvent.getAll()))
-        self.view.pending_functionality()
+            
+        json_container = self.view.gen_event_json_prompt(event)
+        if not json_container.exists():
+            self.view.go_to_next_action_prompt(AppActions.GEN_EVENT_JSON, event, "La carpeta no existe, pero puede volver a itentar:")
+        if not json_container.is_dir():
+            self.view.go_to_next_action_prompt(AppActions.GEN_EVENT_JSON, event, "Debe darme la dirección de una carpeta, no de un archivo. Puede volver a intentar:")
+        json_name = datetime.datetime.now().strftime("%d%m%y_%H%M%S") + "-" + event.name_abbreviation + "-" + event.get_version() + ".json"
+        json_path = json_container / json_name
+        json_dict = event.json_serializable_dict()
+        json_dict["restaurants"] = sorted(json_dict["restaurants"], key=lambda r: r["name"])
+        with json_path.open("w", encoding="utf-8") as json_file:
+            json.dump(json_dict, json_file, ensure_ascii=False, indent=4)
+        
+        self.view.go_to_next_action_prompt(AppActions.GEN_EVENT_CSV, event, "JSON Generado exitosamente en: " + str(json_path.absolute()))
 
     def gen_event_csv(self, event: XweekEvent = None):
         if event is None:

@@ -90,6 +90,7 @@ def general_nomalization_template_version(text) -> str:
     text = re.sub(r' *🥤 *Bebidas *: *', '🍺 ', text)
     text = re.sub(r' *🍺 *Maridaje *sugerido *: *', '🥤 ', text)
     text = re.sub(r' *🍺 *MARIDAJE *SUGERIDO *: *', '🥤 ', text)
+    text = re.sub(r' *💵 *Precio *: *', '💵 ', text)
     text = re.sub(r' *📍 *Direcci.*n.* *: *', '📍 ', text)
     text = re.sub(r' *☎️ *Tel.*fono.* *: *', '☎️ ', text)
     text = re.sub(r' *⏰ *Horarios *: *', '⏰ ', text)

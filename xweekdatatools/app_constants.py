@@ -55,27 +55,27 @@ REST_DATA_SEPARATORS = [
     {
         "context": "dish",
         "key": "accompaniment",
-        "emoji": "🍟"
+        "emojis": ["🍟"]
     },
     {
         "context": "dish",
         "key": "drinks",
-        "emoji": "🍺"
+        "emojis": ["🍺"]
     },
     {
         "context": "dish",
         "key": "pairing",
-        "emoji": "🥤"
+        "emojis": ["🥤"]
     },
     {
         "context": "dish",
         "key": "price",
-        "emoji": "💵"
+        "emojis": ["💵"]
     },
     {
         "context": "restaurant",
         "key": "address",
-        "emoji": "📍"
+        "emojis": ["📍"]
     },
     {
         "context": "restaurant",
@@ -85,14 +85,81 @@ REST_DATA_SEPARATORS = [
     {
         "context": "restaurant",
         "key": "opening_hours",
-        "emoji": "⏰"
+        "emojis": ["⏰"]
     },
     {
         "context": "restaurant",
         "key": "delivery",
-        "emoji": "🚚"
+        "emojis": ["🚚"]
     }
 ]
+REST_DATA_SEPARATORS_DICT = {
+    "🍽": {
+        "context": "dish",
+        "key": "name",
+        "emojis": ["🍽️", "🍽"]
+    },
+    "🍽️": {
+        "context": "dish",
+        "key": "name",
+        "emojis": ["🍽️", "🍽"]
+    },
+    "🍔": {
+        "context": "dish",
+        "key": "description",
+        "emojis": ["🍕", "🍔"]
+    },
+    "🍕": {
+        "context": "dish",
+        "key": "description",
+        "emojis": ["🍕", "🍔"]
+    },
+    "🍟": {
+        "context": "dish",
+        "key": "accompaniment",
+        "emojis": ["🍟"]
+    },
+    "🍺": {
+        "context": "dish",
+        "key": "drinks",
+        "emojis": ["🍺"]
+    },
+    "🥤": {
+        "context": "dish",
+        "key": "pairing",
+        "emojis": ["🥤"]
+    },
+    "💵": {
+        "context": "dish",
+        "key": "price",
+        "emojis": ["💵"]
+    },
+    "📍": {
+        "context": "restaurant",
+        "key": "address",
+        "emojis": ["📍"]
+    },
+    "☎": {
+        "context": "restaurant",
+        "key": "phone",
+        "emojis": ["☎️", "☎"]
+    },
+    "☎️": {
+        "context": "restaurant",
+        "key": "phone",
+        "emojis": ["☎️", "☎"]
+    },
+    "⏰": {
+        "context": "restaurant",
+        "key": "opening_hours",
+        "emojis": ["⏰"]
+    },
+    "🚚": {
+        "context": "restaurant",
+        "key": "delivery",
+        "emojis": ["🚚"]
+    }
+}
 
 TXT_FORMAT = """🍽️ Tamarindo Smokey Bomb 
 🍔 Pan Brioche artesanal, rúcula, Hamburguesa de cortes premium a la parrilla, queso cheddar y mermelada de tamarindo, queso provolone derretido con aceite de oliva y orégano y albahaca; tomates deshidratados y tocino crocante. 

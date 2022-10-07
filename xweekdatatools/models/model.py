@@ -89,8 +89,7 @@ class Model():
         Returns:
             dict: Se retorna "db"
         """
-        if input("Está a punto de guardar algo en la base de datos Cancelar:'c':") == "c":# TODO: Borrar esta línea de ayuda
-            sys.exit("Saliendo para no dañar la base de datos")
+        
         with open(cls.db_file_path, "w", encoding="utf-8") as db_file:
             json.dump(cls.db, db_file, ensure_ascii=False, indent=4)
     # SECTION ------------ DB OPERATIONS (CRUD) -----------------  
@@ -181,6 +180,10 @@ class Model():
                         # Sino se seguirá intentando de forma recursiva
                         list_attr.append(cls.make_attr_json_serializable(item, attr_field_type[5:-1]))
             return list_attr
+        # ----- XweekDish
+        if attr_field_type == "XweekDish":
+            if isinstance(attr, dict):
+                return attr
         return None
     
     @classmethod
@@ -244,6 +247,10 @@ class Model():
                         list_attr.append(item_converted)
                     
             return list_attr
+        # ----- XweekDish
+        if attr_field_type == "XweekDish":
+            if isinstance(attr, dict):
+                return attr
         # ------- View
         if attr_field_type == "View":
             if isinstance(attr, View):

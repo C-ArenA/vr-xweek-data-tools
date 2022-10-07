@@ -1,15 +1,16 @@
 # For TYPE CHECKING ------------------
 from __future__ import annotations
-from xweekdatatools.utils.path_helpers import make_valid_path
-from xweekdatatools.app_constants import TXT_FORMAT, AppActions
-import datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from xweekdatatools.controllers import Controller
+    from xweekdatatools.models.xweek_restaurant import XweekRestaurant
     from xweekdatatools.models import XweekEvent
 # ------------------------------------
 
+from xweekdatatools.utils.path_helpers import make_valid_path
+from xweekdatatools.app_constants import TXT_FORMAT, AppActions
+import datetime
 import os
 import json
 from pathlib import Path
@@ -44,6 +45,11 @@ class View:
               f'"{event_data["name"]}" - "{event_data["location"]}"',
               f'Versión {event_data["version"]}, creado el {event_data["created"]}:')
         print(chalk.green(json.dumps(event_data, indent=2, ensure_ascii=False)))
+        
+    def show_rest_data(self, rest: XweekRestaurant, event:XweekEvent):
+        print(chalk.red("Datos del restaurante para el evento:"))
+        print(chalk.red(event.summary()))
+        print(chalk.green(json.dumps(rest.json_serializable_dict(), indent=2, ensure_ascii=False)))
 
     def select_main_action(self, event:XweekEvent=None, extra_message:str=""):
 
@@ -254,7 +260,18 @@ class View:
             return True
         return True
     
-    def go_to_next_action_prompt(self, next_action: AppActions, event: XweekEvent = None):
+    def gen_event_json_prompt(self, event: XweekEvent) -> Path:
+        self.init_ui()
+        print(chalk.blue("Ahora generaremos el JSON del evento para usted"))
+        print(event.summary())
+        json_dst = make_valid_path(inquirer.filepath(
+            message="Dentro de qué carpeta desea guardar el JSON del evento (Puede arrastrar y soltar):",
+            only_directories=True
+        ).execute())
+        return json_dst
+    
+    def go_to_next_action_prompt(self, next_action: AppActions, event: XweekEvent = None, extra_message:str=""):
+        print(chalk.red(extra_message))
         print(chalk.red("-------------------------------"))
         action = inquirer.select(
             message="Elija una acción para continuar:",
@@ -266,6 +283,14 @@ class View:
         ).execute()
         self.controller.choose_action(action, event)
 
+    def write_confirmation(self):
+        import sys
+        print(chalk.red.bold("Está a punto de guardar algo en la base de datos"))
+        if not inquirer.confirm(
+            message="Desea continuar?"
+        ).execute():
+            sys.exit("Saliendo para no dañar la base de datos")
+        
 
 if __name__ == "__main__":
     view = View()
