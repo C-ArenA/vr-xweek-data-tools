@@ -32,3 +32,7 @@ I write it down 'cause reading that project's code made me understand some stuff
 Python that I didn't before (like the way the imports work in a mediume to big project)
 
 I found Nagstamos in [this](https://github.com/mahmoud/awesome-python-applications#tag-education) list of open source Python projects
+
+## NOTES
+* debo implemetnar una funcionalidad para arrastrar las imágenes por restaurante y por evento
+* En el sitio debo usar shortcodes

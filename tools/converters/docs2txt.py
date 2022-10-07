@@ -1,6 +1,4 @@
-import os
 from pathlib import Path
-from sys import flags
 import pypandoc # install version with pandoc included
 import unicodedata
 import re
@@ -98,7 +96,8 @@ def general_nomalization(file_path:Path):
 def general_nomalization_template_version(file_path:Path):
     """
     Normaliza los textos previo a la normalización manual. Aquí no se pierden datos
-    Esto no debería cambiar mucho con el tiempo
+    
+    Esta prenormalización sirve para cuando se usan las plantillas de word
     
     VER: [para mayor referencia sobre regex](regex101.com)
     
