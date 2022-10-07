@@ -1,7 +1,7 @@
 # For TYPE CHECKING ------------------
 from __future__ import annotations
 from xweekdatatools.utils.path_helpers import make_valid_path
-from xweekdatatools.app_constants import AppActions
+from xweekdatatools.app_constants import TXT_FORMAT, AppActions
 import datetime
 from typing import TYPE_CHECKING
 
@@ -45,18 +45,19 @@ class View:
               f'Versión {event_data["version"]}, creado el {event_data["created"]}:')
         print(chalk.green(json.dumps(event_data, indent=2, ensure_ascii=False)))
 
-    def select_main_action(self):
+    def select_main_action(self, event:XweekEvent=None, extra_message:str=""):
 
         self.init_ui()
+        print(chalk.green(extra_message))
         action = inquirer.select(
             message="Elija una opción para proceder:",
             choices=[Choice(app_action, app_action.message()) for app_action in AppActions if app_action != AppActions.SELECT_ACTION],
             default=AppActions.CREATE_NEW_EVENT,
             style=style
         ).execute()
-        self.controller.choose_action(action, None)
+        self.controller.choose_action(action, event)
 
-    def pending_functionality(self):
+    def pending_functionality(self, *args):
         print("No podemos hacer eso aún :(")
         print("Elija otra opción por favor")
         self.select_main_action()
@@ -231,6 +232,28 @@ class View:
             return old_parent
         return False
 
+    def normalize_txts(self, event:XweekEvent) -> bool:
+        self.init_ui()
+        print(chalk.red.bold("Bienvenido al asistente para normalizar los txts del evento (manualmente)"))
+        print("Recuerde que el programa prenormaliza los txts y que")
+        print("si los docs siguen la plantilla, la normalización automática es suficiente")
+        print("Recuerde que se debe seguir el siguiente formato:")
+        print(chalk.blue(TXT_FORMAT))
+        print(chalk.red.bold("\n----------------\n"))
+        if inquirer.confirm(
+            message="Comenzar la normalización? O abortar"
+        ).execute():
+            if len(event.txts_path_list) <= 0:
+                print("No existen txts para normalizar")
+                return False
+            for txt in event.txts_path_list:
+                #editor.edit(filename=str(txt.absolute()))    
+                if os.system("code -w " + '"' + str(txt.absolute()) + '"') == 1:
+                   print("-> VsCode no instalado en su máquina. Edite manualmente:") 
+                   print(chalk.red(str(txt.absolute()))) 
+            return True
+        return True
+    
     def go_to_next_action_prompt(self, next_action: AppActions, event: XweekEvent = None):
         print(chalk.red("-------------------------------"))
         action = inquirer.select(

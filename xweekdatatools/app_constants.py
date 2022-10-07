@@ -94,3 +94,26 @@ REST_DATA_SEPARATORS = [
     }
 ]
 
+TXT_FORMAT = """🍽️ Tamarindo Smokey Bomb 
+🍔 Pan Brioche artesanal, rúcula, Hamburguesa de cortes premium a la parrilla, queso cheddar y mermelada de tamarindo, queso provolone derretido con aceite de oliva y orégano y albahaca; tomates deshidratados y tocino crocante. 
+🍟 Papas o Camotes Curly. 
+🍺 Huari Tradicional o Huari Miel o Huari Chocolate o Pepsi o Pepsi Light o 7Up 
+🥤 Huari Tradicional 
+💵 Precio: Bs. 55 
+🍽️ CHEESERoom 
+🍔 Pan Brioche artesanal, cheese burger americana, lechuga, tomate y cheddar; carne premium de hamburguesa a la parrilla, shroom burger: hamburguesa empanizada con hongos crocantes y rellena de dos tipos de queso, cheddar y mozzarella, acompañada de salsa especial. 
+🍟 Papas o Camotes Curly. 
+🍺 Huari Tradicional o Huari Miel o Huari Chocolate o Pepsi o Pepsi Light o 7Up 
+🥤 Huari Chocolate 
+💵 Precio: Bs. 55 
+🍽️ Veggieroom 
+🍔 Pan Brioche artesanal, lechuga, tomate y cheddar con una shroom burger: hamburguesa empanizada con hongos crocantes y rellena de dos tipos de queso, cheddar y mozzarella, acompañada de salsa especial. 
+🍟 Papas o Camotes Curly. 
+🍺 Huari Tradicional o Huari Miel o Huari Chocolate o Pepsi o Pepsi Light o 7Up 
+🥤 Huari Miel 
+💵 Precio: Bs. 55 
+📍 Av. San Martín, esquina Leonardo Nava, entre 3er y 4to anillo. Av. Cuarto Anillo, entre Av. Beni y av. Banzer, en Patio de Comidas Con Tenedores Norte 
+☎️ 75552233 Cuarto Anillo: 69203924 
+⏰ Lunes a domingos 11:00 a 23:30 
+🚚 PedidosYa y Yaigo
+"""

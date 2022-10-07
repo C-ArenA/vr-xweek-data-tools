@@ -585,7 +585,8 @@
             "restaurants": [],
             "dst_path": null,
             "docs_path_list": [],
-            "txts_path_list": []
+            "txts_path_list": ["F:\\VReality\\XWeekTools\\TEMP\\txts\\06102022_165107\\1. 88 Burger _ Sundaes.txt",
+			"F:\\VReality\\XWeekTools\\TEMP\\txts\\06102022_165107\\10. Cocina Bohemia.txt"]
         }
     ]
 }
