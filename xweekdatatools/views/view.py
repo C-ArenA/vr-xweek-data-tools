@@ -1,5 +1,7 @@
 # For TYPE CHECKING ------------------
 from __future__ import annotations
+from xweekdatatools.utils.path_helpers import make_valid_path
+from xweekdatatools.app_constants import AppActions
 import datetime
 from typing import TYPE_CHECKING
 
@@ -17,8 +19,6 @@ from InquirerPy.base.control import Choice
 style = get_style({"question": "#ff3355", "questionmark": "#ff3355",
                   "answer": "#0055ff"}, style_override=False)
 
-from xweekdatatools.app_constants import AppActions
-from xweekdatatools.utils.path_helpers import make_valid_path
 
 class View:
     def __init__(self, controller: Controller = None) -> None:
@@ -41,8 +41,8 @@ class View:
     def show_event_data(self, event_data: dict):
         self.init_ui()
         print('Estos son los datos del evento',
-              f'"{event_data["event_name"]}" - "{event_data["event_location"]}"',
-              f'Versión {event_data["event_version"]}, creado el {event_data["event_created"]}:')
+              f'"{event_data["name"]}" - "{event_data["location"]}"',
+              f'Versión {event_data["version"]}, creado el {event_data["created"]}:')
         print(chalk.green(json.dumps(event_data, indent=2, ensure_ascii=False)))
 
     def select_main_action(self):
@@ -50,35 +50,8 @@ class View:
         self.init_ui()
         action = inquirer.select(
             message="Elija una opción para proceder:",
-            choices=[
-                Choice(AppActions.COMPLETE_PROCESS,
-                       "REALIZAR PROCESO COMPLETO", enabled=True),
-                Choice(AppActions.CREATE_NEW_EVENT, "Crear nuevo evento"),
-                Choice(AppActions.UPDATE_EVENT_DATA,
-                       "Actualizar datos del evento"),
-                Choice(AppActions.FIND_EVENT_DOCS,
-                       "Encontrar docs del evento"),
-                Choice(AppActions.UPDATE_EVENT_DOCS_LIST,
-                       "Actualizar lista de docs del evento"),
-                Choice(-1, "Encontrar y copiar docs del evento"),
-                Choice(AppActions.FIND_EVENT_IMAGES,
-                       "Encontrar imágenes del evento"),
-                Choice(AppActions.COLLECT_EVENT_IMAGES,
-                       "Encontrar y copiar imágenes del evento"),
-                Choice(AppActions.CONVERT_DOCS2TXT,
-                       "Convertir docs a texto plano"),
-                Choice(AppActions.NORMALIZE_TXT,
-                       "Normalizar textos planos manualmente"),
-                Choice(AppActions.CONVERT_TXT2DATA,
-                       "Convertir texto plano a datos de restaurantes del evento"),
-                Choice(AppActions.GEN_EVENT_JSON, "Generar JSON del evento"),
-                Choice(AppActions.GEN_EVENT_XLSX,
-                       "Generar CSV y XLSX de urls de los restaurantes"),
-                Choice(AppActions.GEN_EVENT_QRS,
-                       "Generar QRs los restaurantes"),
-                Choice(AppActions.EXIT, "SALIR")
-            ],
-            default=AppActions.COMPLETE_PROCESS,
+            choices=[Choice(app_action, app_action.message()) for app_action in AppActions if app_action != AppActions.SELECT_ACTION],
+            default=AppActions.CREATE_NEW_EVENT,
             style=style
         ).execute()
         self.controller.choose_action(action)
@@ -140,20 +113,23 @@ class View:
         xweekevent["domain"] = inquirer.text(
             message="Dominio Web del evento:",
             default=default_domain,
-            completer={ev_def["domain"]: None for ev_def in xweekconfig["event_defaults"]},
+            completer={
+                ev_def["domain"]: None for ev_def in xweekconfig["event_defaults"]},
             multicolumn_complete=True
         ).execute()
-        
+
         # --- 5. URL de medios
-        
-        default_domain = xweekevent["domain"] + "/wp-content/uploads/" + datetime.datetime.now().strftime("%Y/%m")
+
+        default_domain = xweekevent["domain"] + "/wp-content/uploads/" + \
+            datetime.datetime.now().strftime("%Y/%m")
         xweekevent["media_url"] = inquirer.text(
             message="URL de medios (Imágenes):",
             default=default_domain,
-            completer={ev_def["domain"] + "/wp-content/uploads/" + datetime.datetime.now().strftime("%Y/%m"): None for ev_def in xweekconfig["event_defaults"]},
+            completer={ev_def["domain"] + "/wp-content/uploads/" + datetime.datetime.now(
+            ).strftime("%Y/%m"): None for ev_def in xweekconfig["event_defaults"]},
             multicolumn_complete=True
         ).execute()
-        print(xweekevent)
+        
         return xweekevent
 
     def no_model(self, db_path: Path):
@@ -182,16 +158,15 @@ class View:
             choices=choices,
             default=events_list[-1].id
         ).execute()
-        
 
-    def find_docs_ui(self, current_event:XweekEvent) -> list[Path]:
+    def find_docs_ui(self, current_event: XweekEvent) -> list[Path]:
         print(
             "Este es el asistente para encontrar los archivos word dentro de una carpeta")
         current_event.src_path = make_valid_path(inquirer.filepath(
             message="Dentro de qué carpeta desea buscar los archivos de word (Puede arrastrar y soltar):",
             only_directories=True
         ).execute())
-        found_docs:list[Path] = list(current_event.src_path.rglob("*.doc*"))
+        found_docs: list[Path] = list(current_event.src_path.rglob("*.doc*"))
         accepted_docs = []
         print(
             f'Se encontraron {len(found_docs)} documentos de word dentro de la carpeta {current_event.src_path}\n')
@@ -213,7 +188,6 @@ class View:
                 message="Ingrese doc extra manualmente (Puede arrastrar):",
                 only_files=True,
             ).execute())
-            file_name, file_ext = os.path.splitext(new_file)
             if new_file.suffix[:4] == ".doc":
                 accepted_docs.append(new_file)
             else:
@@ -227,7 +201,7 @@ class View:
             print(str(doc))
         return accepted_docs
 
-    def convert_docs2txt_ui(self, event: XweekEvent)-> bool:
+    def convert_docs2txt_ui(self, event: XweekEvent) -> bool:
         self.init_ui()
         print("Ahora se procede a convertir los siguientes docs en txts:")
         for doc in event.docs_path_list:
@@ -235,7 +209,7 @@ class View:
         return inquirer.confirm(
             message="Proceder? O Cancelar? (Y/n)"
         ).execute()
-        
+
     def overwrite_folder_prompt(self, folder_children_list: list[Path]) -> bool:
         """Ayuda a decidir si se sobreescribe la carpeta en la que están los 
         elementos de la lista
@@ -250,14 +224,25 @@ class View:
             return False
         old_parent = folder_children_list[0].parent
         overwrite = inquirer.confirm(
-            message="Desea sobreescribir los archivos en "  + str(old_parent.absolute()) + "?",
+            message="Desea sobreescribir los archivos en " +
+            str(old_parent.absolute()) + "?",
         ).execute()
         if overwrite:
             return old_parent
         return False
-            
-        
-        
+
+    def go_to_next_action_prompt(self, next_action: AppActions):
+        print(chalk.red("-------------------------------"))
+        action = inquirer.select(
+            message="Elija una acción para continuar:",
+            choices=[
+                Choice(next_action, next_action.message()),
+                Choice(AppActions.SELECT_ACTION, "Prompt inicial"),
+                Choice(AppActions.EXIT, "Salir")
+            ]
+        ).execute()
+        self.controller.choose_action(action)
+
 
 if __name__ == "__main__":
     view = View()
