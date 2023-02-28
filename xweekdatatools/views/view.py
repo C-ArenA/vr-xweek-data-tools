@@ -233,18 +233,19 @@ class View:
     
     def show_rest_dishes_img_data(self, rest:XweekRestaurant):
         import pyperclip
-        #print(chalk.yellow("Existen " + str(len(rest.dishes)) + " Platos en " + rest.name))
-        # for dish in rest.dishes:
-        #     print(chalk.blue.bold("---------------------------------"))
-        #     print(chalk.blue.bold(dish["photo_name"]))
-        #     print(chalk.blue.bold("---------------------------------"))
-        #     pyperclip.copy(dish["photo_name"])
-        #     print("Copiado al portapapeles")
-        #     inquirer.confirm(
-        #         message="Siguiente plato?"
-        #     ).execute()
-        
-        
+        print(chalk.yellow("Existen " + str(len(rest.dishes)) + " Platos en " + rest.name))
+        for dish in rest.dishes:
+            print(chalk.blue.bold("---------------------------------"))
+            print(chalk.blue.bold(dish["photo_name"]))
+            print(chalk.blue.bold("---------------------------------"))
+            pyperclip.copy(dish["photo_name"])
+            print("Copiado al portapapeles")
+            inquirer.confirm(
+                message="Siguiente plato?"
+            ).execute()
+    
+    def show_rest_logo_img_data(self, rest:XweekRestaurant):
+        import pyperclip
         print(chalk.blue.bold("---------------------------------"))
         print(chalk.blue.bold(rest.logo_name))
         print(chalk.blue.bold("---------------------------------"))
