@@ -1,22 +1,30 @@
 # For TYPE CHECKING ------------------
 from __future__ import annotations
+import shutil
 from typing import TYPE_CHECKING
-
 if TYPE_CHECKING:
     from xweekdatatools.controllers import Controller
-    from xweekdatatools.models.xweek_restaurant import XweekRestaurant
+    from xweekdatatools.models import XweekRestaurant
     from xweekdatatools.models import XweekEvent
+    from xweekdatatools.models import Model
 # ------------------------------------
 
-from xweekdatatools.utils.path_helpers import make_valid_path
-from xweekdatatools.app_constants import TXT_FORMAT, AppActions
-import datetime
+# ----------- IMPORTS ---------------
+# ---------- PYTHON IMPORTS
 import os
 import json
+import datetime
 from pathlib import Path
+# ---------- THIRD PARTY IMPORTS
 from yachalk import chalk
 from InquirerPy import inquirer, get_style, validator
 from InquirerPy.base.control import Choice
+# ---------- LOCAL IMPORTS
+from xweekdatatools.utils.path_helpers import make_valid_path
+from xweekdatatools.app_constants import TXT_FORMAT, AppActions
+# -----------------------------------
+
+# ---------- GLOBALS
 style = get_style({"question": "#ff3355", "questionmark": "#ff3355",
                   "answer": "#0055ff"}, style_override=False)
 
@@ -26,8 +34,7 @@ class View:
         self.controller = controller
 
     def init_ui(self):
-        """
-        Genera el encabezado de la UI
+        """Genera el encabezado de la UI
         """
         os.system('cls' if os.name == 'nt' else 'clear')
         print(chalk.blue.bold(
@@ -45,28 +52,41 @@ class View:
               f'"{event_data["name"]}" - "{event_data["location"]}"',
               f'Versión {event_data["version"]}, creado el {event_data["created"]}:')
         print(chalk.green(json.dumps(event_data, indent=2, ensure_ascii=False)))
-        
-    def show_rest_data(self, rest: XweekRestaurant, event:XweekEvent):
+
+    def show_rest_data(self, rest: XweekRestaurant, event: XweekEvent):
         print(chalk.red("Datos del restaurante para el evento:"))
         print(chalk.red(event.summary()))
-        print(chalk.green(json.dumps(rest.json_serializable_dict(), indent=2, ensure_ascii=False)))
+        print(chalk.green(json.dumps(
+            rest.json_serializable_dict(), indent=2, ensure_ascii=False)))
 
-    def select_main_action(self, event:XweekEvent=None, extra_message:str=""):
-
+    def pending_functionality(self, *args):
+        self.select_main_action(extra_message="Esa funcionalidad aún no está disponible 😓\nElija otra acción por favor")
+    
+    def write_confirmation(self):
+        import sys
+        print(chalk.red.bold("Está a punto de guardar algo en la base de datos"))
+        if not inquirer.confirm(
+            message="Desea continuar?"
+        ).execute():
+            sys.exit("Saliendo para no dañar la base de datos")
+            
+    #--------------------------------------------------------------
+    # SECTION: ActionsUI ------------------------------------------
+    #--------------------------------------------------------------
+      
+    def select_main_action(self, event: XweekEvent = None, extra_message: str = ""):
         self.init_ui()
         print(chalk.green(extra_message))
         action = inquirer.select(
             message="Elija una opción para proceder:",
-            choices=[Choice(app_action, app_action.message()) for app_action in AppActions if app_action != AppActions.SELECT_ACTION],
+            choices=[Choice(value=app_action, name=app_action.message())
+                     for app_action in AppActions
+                     if app_action != AppActions.SELECT_ACTION],
             default=AppActions.CREATE_NEW_EVENT,
             style=style
         ).execute()
         self.controller.choose_action(action, event)
 
-    def pending_functionality(self, *args):
-        print("No podemos hacer eso aún :(")
-        print("Elija otra opción por favor")
-        self.select_main_action()
 
     def insert_event_data(self, xweekconfig, xweeklastevent):
         """Ayuda al usuario a actualizar los datos del evento
@@ -107,7 +127,8 @@ class View:
         # --- 4. Versión del Evento
         xweekevent["version"] = inquirer.number(
             message="Versión del evento (Número)",
-            validate=validator.EmptyInputValidator()
+            validate=validator.EmptyInputValidator(),
+            default=xweeklastevent["version"]
         ).execute()
         # --- 5. Dominio del Evento
         try:
@@ -136,34 +157,26 @@ class View:
             ).strftime("%Y/%m"): None for ev_def in xweekconfig["event_defaults"]},
             multicolumn_complete=True
         ).execute()
-        
+
         return xweekevent
 
-    def no_model(self, db_path: Path):
-        self.init_ui()
-        print(chalk.red.bold(
-            "ERROR GRAVE: No se pudo conectar con la base de datos en " + str(db_path)))
-        print(chalk.red("Ejecución abortada"))
-
-    def has_model(self, db_path: Path):
-        self.init_ui()
-        print(chalk.green.bold(
-            "Base de datos conectada exitosamente en: " + str(db_path)))
-
-    def select_event(self, events_list: list[XweekEvent]) -> int:
-        """UI para seleccionar (por ID) un evento de una lista de eventos
+    def select_entry(self, entries_list: list[Model]) -> int:
+        """UI para seleccionar (por ID) una entrada de datos de una lista
 
         Args:
-            events_list (list[XweekEvent]): Lista de eventos sobre los cuales seleccionar
+            entries_list (list[Model]): Lista de datos sobre los cuales seleccionar
 
         Returns:
-            int: ID del evento seleccionado o None si nada fue seleccionado
+            int: ID de la entrada seleccionado o None si nada fue seleccionado
         """
-        choices = [Choice(event.id, event.summary()) for event in events_list]
+        choices = [Choice(entry.id, entry.summary()) for entry in entries_list]
+        if len(entries_list) <= 0:
+            return None
         return inquirer.select(
-            message="Seleccione el evento sobre el cual trabajar",
+            message="Elija un " + entries_list[0].ENTRY_NAME,
             choices=choices,
-            default=events_list[-1].id
+            default=entries_list[-1].id,
+            style=style
         ).execute()
 
     def find_docs_ui(self, current_event: XweekEvent) -> list[Path]:
@@ -207,6 +220,70 @@ class View:
         for doc in accepted_docs:
             print(str(doc))
         return accepted_docs
+    
+    def show_rest_dishes_img_data(self, rest:XweekRestaurant):
+        import pyperclip
+        #print(chalk.yellow("Existen " + str(len(rest.dishes)) + " Platos en " + rest.name))
+        # for dish in rest.dishes:
+        #     print(chalk.blue.bold("---------------------------------"))
+        #     print(chalk.blue.bold(dish["photo_name"]))
+        #     print(chalk.blue.bold("---------------------------------"))
+        #     pyperclip.copy(dish["photo_name"])
+        #     print("Copiado al portapapeles")
+        #     inquirer.confirm(
+        #         message="Siguiente plato?"
+        #     ).execute()
+        
+        
+        print(chalk.blue.bold("---------------------------------"))
+        print(chalk.blue.bold(rest.logo_name))
+        print(chalk.blue.bold("---------------------------------"))
+        pyperclip.copy(rest.logo_name)
+        print("Copiado al portapapeles")
+        inquirer.confirm(
+            message="Siguiente logo?"
+        ).execute()
+        
+    def show_dishes_img_data(self, event:XweekEvent):
+        self.init_ui()
+        dish_counter = 0
+        for rest in event.restaurants:
+            dish_counter += len(rest.dishes)
+        print(chalk.green("Existen " + str(len(event.restaurants)) + " Restaurantes en este evento"))
+        print(chalk.red("Existen " + str(dish_counter) + " Platos en este evento"))
+        event.restaurants = sorted(
+            event.restaurants, key=lambda r: r.name)
+        for rest in event.restaurants:
+            self.show_rest_dishes_img_data(rest)
+            
+        inquirer.confirm(
+            message="Continuar?"
+        ).execute()
+            
+    
+            
+    
+    def collect_images_ui(self) -> tuple[Path, list[Path]]:
+        print(
+            "Este es el asistente para recolectar imágenes dentro de una carpeta")
+        img_src = make_valid_path(inquirer.filepath(
+            message="Dentro de qué carpeta desea buscar las imágenes (Puede arrastrar y soltar):",
+            only_directories=True
+        ).execute())
+        img_dst = make_valid_path(inquirer.filepath(
+            message="En qué carpeta desea guadarlas (Puede arrastrar y soltar):",
+            only_directories=True
+        ).execute())
+        found_imgs: list[Path] = list(img_src.rglob("*.jp*g")) + \
+                                 list(img_src.rglob("*.png")) + \
+                                 list(img_src.rglob("*.ai")) + \
+                                 list(img_src.rglob("*.pdf")) + \
+                                 list(img_src.rglob("*.psd"))
+        if inquirer.confirm(
+            message="Copiar los " + str(len(found_imgs)) + " archivos de imagen?"
+        ):
+            return img_dst, found_imgs                                 
+        return img_dst, list()
 
     def convert_docs2txt_ui(self, event: XweekEvent) -> bool:
         self.init_ui()
@@ -238,9 +315,10 @@ class View:
             return old_parent
         return False
 
-    def normalize_txts(self, event:XweekEvent) -> bool:
+    def normalize_txts(self, event: XweekEvent) -> bool:
         self.init_ui()
-        print(chalk.red.bold("Bienvenido al asistente para normalizar los txts del evento (manualmente)"))
+        print(chalk.red.bold(
+            "Bienvenido al asistente para normalizar los txts del evento (manualmente)"))
         print("Recuerde que el programa prenormaliza los txts y que")
         print("si los docs siguen la plantilla, la normalización automática es suficiente")
         print("Recuerde que se debe seguir el siguiente formato:")
@@ -253,13 +331,13 @@ class View:
                 print("No existen txts para normalizar")
                 return False
             for txt in event.txts_path_list:
-                #editor.edit(filename=str(txt.absolute()))    
+                # editor.edit(filename=str(txt.absolute()))
                 if os.system("code -w " + '"' + str(txt.absolute()) + '"') == 1:
-                   print("-> VsCode no instalado en su máquina. Edite manualmente:") 
-                   print(chalk.red(str(txt.absolute()))) 
+                    print("-> VsCode no instalado en su máquina. Edite manualmente:")
+                    print(chalk.red(str(txt.absolute())))
             return True
         return True
-    
+
     def gen_event_json_prompt(self, event: XweekEvent) -> Path:
         self.init_ui()
         print(chalk.blue("Ahora generaremos el JSON del evento para usted"))
@@ -269,8 +347,8 @@ class View:
             only_directories=True
         ).execute())
         return json_dst
-    
-    def go_to_next_action_prompt(self, next_action: AppActions, event: XweekEvent = None, extra_message:str=""):
+
+    def go_to_next_action_prompt(self, next_action: AppActions, event: XweekEvent = None, extra_message: str = ""):
         print(chalk.red(extra_message))
         print(chalk.red("-------------------------------"))
         action = inquirer.select(
@@ -283,14 +361,8 @@ class View:
         ).execute()
         self.controller.choose_action(action, event)
 
-    def write_confirmation(self):
-        import sys
-        print(chalk.red.bold("Está a punto de guardar algo en la base de datos"))
-        if not inquirer.confirm(
-            message="Desea continuar?"
-        ).execute():
-            sys.exit("Saliendo para no dañar la base de datos")
-        
+    
+
 
 if __name__ == "__main__":
     view = View()

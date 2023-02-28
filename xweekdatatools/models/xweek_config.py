@@ -8,7 +8,7 @@ from xweekdatatools.models import Model
 from xweekdatatools.utils import make_valid_path, json_serializable_path
 
 @dataclass
-class XweekEvent(Model):
+class XweekConfig(Model):
     MODEL_NAME_IN_JSON = "xweekconfig"
     # ********* Mandatory ***********:
     name: str = field(
@@ -26,7 +26,7 @@ class XweekEvent(Model):
     def getAll(cls) -> dict:
         db = cls.get_current_db_state()
         events = []
-        for event in db[XweekEvent.MODEL_NAME_IN_JSON]:
+        for event in db[XweekConfig.MODEL_NAME_IN_JSON]:
             # Sólo se añaden a la lista si son datos válidos
             try:
                 events.append(cls(**event))

@@ -11,6 +11,7 @@ from xweekdatatools.utils.data_helpers import cardinal_to_ordinal
 @dataclass
 class XweekEvent(Model):
     MODEL_NAME_IN_JSON = "xweekevents"
+    ENTRY_NAME = "evento"
     # ********* Mandatory ***********:
     name: str = field(
         default="", 

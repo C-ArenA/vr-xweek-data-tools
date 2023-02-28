@@ -3,13 +3,15 @@ import enum
 DB_FILE_PATH = "./xweekdatatools/db.json"
 class AppActions(enum.Enum):
     SELECT_ACTION = enum.auto()
-    # COMPLETE_PROCESS = enum.auto()
     CREATE_NEW_EVENT = enum.auto()
     UPDATE_EVENT_DATA = enum.auto()
     FIND_EVENT_DOCS = enum.auto()
     UPDATE_EVENT_DOCS_LIST = enum.auto()
-    FIND_EVENT_IMAGES = enum.auto()
+    COLLECT_IMAGES = enum.auto()
+    SHOW_DISHES = enum.auto()
     COLLECT_EVENT_IMAGES = enum.auto()
+    COLLECT_RESTAURANT_LOGO = enum.auto()
+    COLLECT_DISH_PHOTO = enum.auto()
     CONVERT_DOCS2TXT = enum.auto()
     NORMALIZE_TXT = enum.auto()
     CONVERT_TXT2DATA = enum.auto()
@@ -21,24 +23,28 @@ class AppActions(enum.Enum):
     
     def message(self):
         action_message = {
-			AppActions.SELECT_ACTION: "Seleccionar una acción",
-			#AppActions.COMPLETE_PROCESS: "Realizar el procedimiento completo",
-			AppActions.CREATE_NEW_EVENT: "Crear nuevo evento",
-			AppActions.UPDATE_EVENT_DATA: "Actualizar datos del evento",
-			AppActions.FIND_EVENT_DOCS: "Encontrar docs del evento",
-			AppActions.UPDATE_EVENT_DOCS_LIST: "Actualizar lista de docs del evento",
-			AppActions.FIND_EVENT_IMAGES: "Encontrar imágenes del evento",
-			AppActions.COLLECT_EVENT_IMAGES: "Recolectar imágenes del evento en una carpeta",
-			AppActions.CONVERT_DOCS2TXT: "Convertir docs a texto plano (prenormalizado)",
-			AppActions.NORMALIZE_TXT: "Normalizar lista de txts manualmente",
-			AppActions.CONVERT_TXT2DATA: "Convertir txts a datos",
-			AppActions.GEN_EVENT_JSON: "Generar JSON del evento",
-			AppActions.GEN_EVENT_CSV: "Generar CSV de URLs del evento",
-			AppActions.GEN_EVENT_XLSX: "Generar Excel de URLs del evento",
-			AppActions.GEN_EVENT_QRS: "Generar QRs del evento",
-			AppActions.EXIT: "SALIR DE LA APLICACIÓN",
-		}
-        return action_message[self]
+            AppActions.SELECT_ACTION: "Seleccionar una acción",
+            AppActions.CREATE_NEW_EVENT: "Crear nuevo evento",
+            AppActions.UPDATE_EVENT_DATA: "Actualizar datos del evento",
+            AppActions.FIND_EVENT_DOCS: "Encontrar docs del evento",
+            AppActions.UPDATE_EVENT_DOCS_LIST: "Actualizar lista de docs del evento",
+            AppActions.COLLECT_IMAGES: "Recolectar imágenes en una carpeta",
+            AppActions.SHOW_DISHES: "Ver platos del evento",
+            AppActions.COLLECT_EVENT_IMAGES: "Recolectar imágenes del evento en una carpeta",
+            AppActions.COLLECT_RESTAURANT_LOGO: "Recolectar logo del restaurante",
+            AppActions.COLLECT_DISH_PHOTO: "Recolectar foto del plato",
+            AppActions.CONVERT_DOCS2TXT: "Convertir docs a texto plano (prenormalizado)",
+            AppActions.NORMALIZE_TXT: "Normalizar lista de txts manualmente",
+            AppActions.CONVERT_TXT2DATA: "Convertir txts a datos",
+            AppActions.GEN_EVENT_JSON: "Generar JSON del evento",
+            AppActions.GEN_EVENT_CSV: "Generar CSV de URLs del evento",
+            AppActions.GEN_EVENT_XLSX: "Generar Excel de URLs del evento",
+            AppActions.GEN_EVENT_QRS: "Generar QRs del evento",
+            AppActions.EXIT: "SALIR DE LA APLICACIÓN",
+        }
+        if self in action_message:
+            return action_message[self]
+        return "Acción no definida"
 
 
 REST_DATA_SEPARATORS = [

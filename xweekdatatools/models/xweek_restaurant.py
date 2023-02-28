@@ -16,6 +16,7 @@ from xweekdatatools.models.xweek_dish import XweekDish
 class XweekRestaurant(Model):
     # Class Attributes
     MODEL_NAME_IN_JSON = "restaurants"
+    ENTRY_NAME = "restaurante"
     # Instance Attributes
     order: int = None
     name: str = ""
@@ -148,6 +149,8 @@ class XweekRestaurant(Model):
         
         # Para evitar problemas de compatibilidad remplazamos emojis
         # problemáticos con sus equivalentes:
+        # (Estos emojis usan a variation selector que añade el 16 (U+FE0E))
+        # En algunas fuentes se ven iguales, pero al compararse son diferentes
         # TODO: Sacar esta parte de aquí
         text = text.replace('🍽️', '🍽')
         text = text.replace('☎️', '☎')

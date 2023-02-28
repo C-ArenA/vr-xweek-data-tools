@@ -1,11 +1,12 @@
 # For TYPE CHECKING ------------------
 from __future__ import annotations
+import logging
+import shutil
 from typing import TYPE_CHECKING
 
-from xweekdatatools.models.xweek_restaurant import XweekRestaurant
+from slugify import slugify
 if TYPE_CHECKING:
     from xweekdatatools.views import View
-    from xweekdatatools.models import Model
 # ------------------------------------
 
 # ----------- IMPORTS ---------------
@@ -17,6 +18,7 @@ from pathlib import Path
 # ---------- LOCAL IMPORTS
 from xweekdatatools.app_constants import AppActions
 from xweekdatatools.models.xweek_event import XweekEvent
+from xweekdatatools.models.xweek_restaurant import XweekRestaurant
 from xweekdatatools.utils import docs2txt
 
 
@@ -24,24 +26,18 @@ class Controller:
     """Controlador Principal de XWEEKTOOLS
     """
 
-    def __init__(self, view: View = None, model: Model = None) -> None:
+    def __init__(self, view: View = None) -> None:
         self.view = view
-        self.model = model
-        self.current_action = None
-        self.current_event_id = None
 
     def set_view(self, view):
         self.view = view
-
-    def set_model(self, model):
-        self.model = model
 
     def start_app(self):
         self.view.select_main_action()
 
     def choose_action(self, action: AppActions, event):
-        """#Router of the application.
-        It gets an action from the view and transforms it to some functionality
+        """Router of the application.
+        It gets an AppAction from the view and transforms it to some functionality
         or shows a pending_functionality message if no functionality is available yet
 
         Args:
@@ -57,7 +53,8 @@ class Controller:
         actions[AppActions.UPDATE_EVENT_DATA] = self.update_event
         actions[AppActions.FIND_EVENT_DOCS] = self.find_event_docs
         actions[AppActions.UPDATE_EVENT_DOCS_LIST] = self.find_event_docs
-        actions[AppActions.FIND_EVENT_IMAGES] = self.find_event_images
+        actions[AppActions.SHOW_DISHES] = self.show_dishes
+        actions[AppActions.COLLECT_IMAGES] = self.collect_images
         actions[AppActions.COLLECT_EVENT_IMAGES] = self.collect_event_images
         actions[AppActions.CONVERT_DOCS2TXT] = self.convert_docs2txt
         actions[AppActions.NORMALIZE_TXT] = self.normalize_txt
@@ -69,7 +66,6 @@ class Controller:
         actions[AppActions.EXIT] = self.exit
         # Once the functionality is available we execute it
         if type(action) is AppActions:
-            self.current_action = action
             actions[action](event)
         else:
             self.view.pending_functionality()
@@ -79,7 +75,9 @@ class Controller:
     def create_new_event(self, dumb_event=None):
 
         new_xwe_dict = self.view.insert_event_data(
-            self.model.db["xweekconfig"], XweekEvent.getAll()[-1].json_serializable_dict())
+            xweekconfig=XweekEvent.get_current_db_state()["xweekconfig"],
+            xweeklastevent=XweekEvent.getAll()[-1].json_serializable_dict()
+        )
         new_xwe = XweekEvent(**new_xwe_dict)
         new_xwe.save()
         self.view.go_to_next_action_prompt(AppActions.FIND_EVENT_DOCS, new_xwe)
@@ -87,10 +85,14 @@ class Controller:
     def update_event(self, event: XweekEvent = None):
         if event is None:
             event = XweekEvent.getById(
-                self.view.select_event(XweekEvent.getAll()))
+                self.view.select_entry(XweekEvent.getAll()))
         new_xwe_dict = self.view.insert_event_data(
-            self.model.db["xweekconfig"], event.json_serializable_dict())
+            xweekconfig=XweekEvent.get_current_db_state()["xweekconfig"],
+            xweeklastevent=event.json_serializable_dict()
+        )
         new_xwe_dict["id"] = event.id
+        # Al evento existente se le añade los nuevos datos ingresados (MERGE)
+        new_xwe_dict = event.to_dict() | new_xwe_dict
         new_xwe = XweekEvent(**new_xwe_dict)
         self.view.show_event_data(new_xwe.json_serializable_dict())
         new_xwe.save()
@@ -99,7 +101,7 @@ class Controller:
     def find_event_docs(self, event: XweekEvent = None):
         if event is None:
             event = XweekEvent.getById(
-                self.view.select_event(XweekEvent.getAll()))
+                self.view.select_entry(XweekEvent.getAll()))
         docs = self.view.find_docs_ui(event)
         event.docs_path_list = docs
         event.save()
@@ -109,7 +111,7 @@ class Controller:
 
         if event is None:
             event = XweekEvent.getById(
-                self.view.select_event(XweekEvent.getAll()))
+                self.view.select_entry(XweekEvent.getAll()))
         if self.view.convert_docs2txt_ui(event):
             overwrite = self.view.overwrite_folder_prompt(event.txts_path_list)
             if overwrite:
@@ -130,7 +132,7 @@ class Controller:
 
         if event is None:
             event = XweekEvent.getById(
-                self.view.select_event(XweekEvent.getAll()))
+                self.view.select_entry(XweekEvent.getAll()))
         for txt in event.txts_path_list:
             if txt.exists:
                 pass
@@ -146,7 +148,7 @@ class Controller:
     def convert_txt2data(self, event: XweekEvent = None):
         if event is None:
             event = XweekEvent.getById(
-                self.view.select_event(XweekEvent.getAll()))
+                self.view.select_entry(XweekEvent.getAll()))
         # Vacío el evento de restaurantes
         self.view.write_confirmation()
         event.restaurants = []
@@ -157,62 +159,87 @@ class Controller:
                 try:
                     new_rest.order = txt.stem.split(".")[0]
                 except:
-                    new_rest.order = None                    
+                    new_rest.order = None
                 event.restaurants.append(new_rest)
                 event.save()
-        # self.view.show_rest_data(rest, event)
-        # input("txt2data: Continuar?")
         self.view.go_to_next_action_prompt(AppActions.GEN_EVENT_JSON, event)
 
     def gen_event_json(self, event: XweekEvent = None):
         import json
         if event is None:
             event = XweekEvent.getById(
-                self.view.select_event(XweekEvent.getAll()))
-            
+                self.view.select_entry(XweekEvent.getAll()))
+
         json_container = self.view.gen_event_json_prompt(event)
         if not json_container.exists():
-            self.view.go_to_next_action_prompt(AppActions.GEN_EVENT_JSON, event, "La carpeta no existe, pero puede volver a itentar:")
+            self.view.go_to_next_action_prompt(
+                AppActions.GEN_EVENT_JSON, event, "La carpeta no existe, pero puede volver a itentar:")
         if not json_container.is_dir():
-            self.view.go_to_next_action_prompt(AppActions.GEN_EVENT_JSON, event, "Debe darme la dirección de una carpeta, no de un archivo. Puede volver a intentar:")
-        json_name = datetime.datetime.now().strftime("%d%m%y_%H%M%S") + "-" + event.name_abbreviation + "-" + event.get_version() + ".json"
+            self.view.go_to_next_action_prompt(
+                AppActions.GEN_EVENT_JSON, event, "Debe darme la dirección de una carpeta, no de un archivo. Puede volver a intentar:")
+        json_name = datetime.datetime.now().strftime("%d%m%y_%H%M%S") + "-" + \
+            event.name_abbreviation + "-" + event.get_version() + ".json"
         json_path = json_container / json_name
         json_dict = event.json_serializable_dict()
-        json_dict["restaurants"] = sorted(json_dict["restaurants"], key=lambda r: r["name"])
+        json_dict["restaurants"] = sorted(
+            json_dict["restaurants"], key=lambda r: r["name"])
         with json_path.open("w", encoding="utf-8") as json_file:
             json.dump(json_dict, json_file, ensure_ascii=False, indent=4)
-        
-        self.view.go_to_next_action_prompt(AppActions.GEN_EVENT_CSV, event, "JSON Generado exitosamente en: " + str(json_path.absolute()))
+
+        self.view.go_to_next_action_prompt(
+            AppActions.GEN_EVENT_CSV, event, "JSON Generado exitosamente en: " + str(json_path.absolute()))
 
     def gen_event_csv(self, event: XweekEvent = None):
         if event is None:
             event = XweekEvent.getById(
-                self.view.select_event(XweekEvent.getAll()))
+                self.view.select_entry(XweekEvent.getAll()))
         self.view.pending_functionality()
 
     def gen_event_xlsx(self, event: XweekEvent = None):
         if event is None:
             event = XweekEvent.getById(
-                self.view.select_event(XweekEvent.getAll()))
+                self.view.select_entry(XweekEvent.getAll()))
         self.view.pending_functionality()
 
     def gen_event_qrs(self, event: XweekEvent = None):
         if event is None:
             event = XweekEvent.getById(
-                self.view.select_event(XweekEvent.getAll()))
+                self.view.select_entry(XweekEvent.getAll()))
         self.view.pending_functionality()
-    def find_event_images(self, event: XweekEvent = None):
+
+    def collect_images(self, event: XweekEvent = None):
         if event is None:
             event = XweekEvent.getById(
-                self.view.select_event(XweekEvent.getAll()))
-        self.view.pending_functionality()
+                self.view.select_entry(XweekEvent.getAll()))
+        dst, imgs = self.view.collect_images_ui()
+        for img in imgs:
+            try:
+                img_dst = dst / (slugify(img.parent.name.split(" ", 1)[1]) + "-" + event.get_version() + "_" + slugify(img.stem) + img.suffix)
+            except:
+                continue
+                
+            logging.info("dst: " + str(dst.absolute()) + "\n src: " + str(img.absolute()))
+            copia = shutil.copy(str(img.absolute()), str(img_dst.absolute()))
+            print("Copiado: " + copia)
+        self.view.select_main_action(event, "Terminado el proceso de recolección de imágenes")
+    
+    
+        
+    def show_dishes(self, event: XweekEvent = None):
+        if event is None:
+            event = XweekEvent.getById(
+                self.view.select_entry(XweekEvent.getAll()))
+        self.view.show_dishes_img_data(event)
+        self.view.select_main_action(event)
+        
+    
+        
     def collect_event_images(self, event: XweekEvent = None):
         if event is None:
             event = XweekEvent.getById(
-                self.view.select_event(XweekEvent.getAll()))
+                self.view.select_entry(XweekEvent.getAll()))
         self.view.pending_functionality()
 
     def exit(self, dumb=None):
-        import sys
-
-        sys.exit("Programa finalizado")
+        return
+        # sys.exit("Programa finalizado")

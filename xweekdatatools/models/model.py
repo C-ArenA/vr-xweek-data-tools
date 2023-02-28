@@ -24,6 +24,7 @@ from xweekdatatools.app_constants import DB_FILE_PATH
 @dataclass
 class Model():
     # Class Attributes
+    ENTRY_NAME = "modelo"
     db_file_path =Path(DB_FILE_PATH)
     db = get_db_dict_from_json_file_path(db_file_path)
     # Cualquier instancia de un modelo de datos necesita tener un ID
@@ -31,8 +32,6 @@ class Model():
     id: int = None
     created: str = datetime.datetime.now().strftime("%d-%m-%y_%H-%M-%S")
     modified: str = datetime.datetime.now().strftime("%d-%m-%y_%H-%M-%S")
-    # In case we need a View for our instance:
-    view: View = field(default=None, repr=False)
 
     def __post_init__(self):
         self.db_load()
@@ -46,10 +45,6 @@ class Model():
         # Si no se proporciona un ID se genera automaticamente
         self.id = self.next_id() if self.id is None else self.id
 
-    def set_view(self, view):
-        self.view = view
-        
-
     @classmethod
     def get_current_db_state(cls) -> dict:
         try:
@@ -57,8 +52,6 @@ class Model():
                 return json.load(db_file)
         except:
             sys.exit("No se pueded abrir base de datos :(")
-            print("No se puede abrir el JSON")
-            return dict()
 
     @classmethod
     def db_load(cls) -> dict:
