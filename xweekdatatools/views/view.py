@@ -221,6 +221,16 @@ class View:
             print(str(doc))
         return accepted_docs
     
+    def get_txts_lists(self) -> list[Path]:
+        print(
+            "En caso de ya tener los txts normalizados en una carpeta:")
+        txts_folder = make_valid_path(inquirer.filepath(
+            message="Dentro de qué carpeta desea buscar estos txts (Puede arrastrar y soltar):",
+            only_directories=True
+        ).execute())
+        found_txts: list[Path] = list(txts_folder.rglob("*.txt"))
+        return found_txts
+    
     def show_rest_dishes_img_data(self, rest:XweekRestaurant):
         import pyperclip
         #print(chalk.yellow("Existen " + str(len(rest.dishes)) + " Platos en " + rest.name))

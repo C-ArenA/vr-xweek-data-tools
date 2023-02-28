@@ -90,6 +90,7 @@ class Controller:
             xweekconfig=XweekEvent.get_current_db_state()["xweekconfig"],
             xweeklastevent=event.json_serializable_dict()
         )
+        event.txts_path_list = self.view.get_txts_lists()
         new_xwe_dict["id"] = event.id
         # Al evento existente se le añade los nuevos datos ingresados (MERGE)
         new_xwe_dict = event.to_dict() | new_xwe_dict
